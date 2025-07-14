@@ -9,13 +9,27 @@ struct Tuple {
     Tuple();
     bool isPoint() const;
     bool isVector() const;
-    bool operator==(const Tuple& other) const {
-        return (x - other.x < EPSILON) && (y - other.y < EPSILON) && (z - other.z < EPSILON) && (w- other.w < EPSILON);
-    }
+
+    float magnitude() const;
+    Tuple normalize() const;
+    float dot(const Tuple& other) const;
+
+    bool operator==(const Tuple& other) const;
+    Tuple operator+(const Tuple& other) const;
+    Tuple operator-(const Tuple& other) const;
+    Tuple operator*(const float other) const;
+    Tuple operator*(const int other) const;
+    Tuple operator/(const float other) const;
+    Tuple operator-() const;
 };
+
+// Global operators for scalar multiplication from the left
+Tuple operator*(float scalar, const Tuple& tuple);
+Tuple operator*(int scalar, const Tuple& tuple);
 
 struct Vector : public Tuple {
     Vector(float x, float y, float z);
+    Vector cross(const Vector& other) const;
 };
 
 struct Point : public Tuple {
