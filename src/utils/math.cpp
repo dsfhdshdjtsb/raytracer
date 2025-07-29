@@ -13,26 +13,18 @@ bool Tuple::isVector() const {
     return w == 0.0f;
 }
 
-
 float Tuple::magnitude() const {
-    return sqrt((x * x) + (y * y) + (z*z) + (w*w));
+    return sqrt((x * x) + (y * y) + (z * z)); //ignores w
 }
+
 Tuple Tuple::normalize() const {
     float mag = this->magnitude();
-    return Tuple(x / mag, y / mag, z / mag, w / mag);
+    return Tuple(x / mag, y / mag, z / mag, w / mag); //w should be 0
 }
+
 float Tuple::dot(const Tuple& other) const {
     return x * other.x + y * other.y + z * other.z + w * other.w;
 }
-Vector Vector::cross(const Vector& other) const {
-    return Vector(y * other.z - z * other.y,
-                z * other.x - x * other.z,
-                x * other.y - y * other.x);
-}
-
-Vector::Vector(float x, float y, float z) : Tuple(x, y, z, 0) {}
-
-Point::Point(float x, float y, float z) : Tuple(x, y, z, 1) {}
 
 bool Tuple::operator==(const Tuple& other) const {
     return (std::abs(x - other.x) < EPSILON) && 
@@ -49,16 +41,54 @@ Tuple Tuple::operator-(const Tuple& other) const {
     return Tuple(x - other.x, y - other.y, z - other.z, w - other.w);
 }
 
+Tuple Tuple::operator*(const Tuple& other) const {
+    return Tuple(x * other.x, y * other.y, z * other.z, w * other.w);
+}
+
+Tuple Tuple::operator*(float scalar) const {
+    return Tuple(x * scalar, y * scalar, z * scalar, w * scalar);
+}
+
+//Tuple Tuple::operator*(int scalar) const {
+    //return Tuple(x * scalar, y * scalar, z * scalar, w * scalar);
+//}
+
+Tuple Tuple::operator/(float scalar) const {
+    return Tuple(x / scalar, y / scalar, z / scalar, w / scalar);
+}
+
 Tuple Tuple::operator-() const {
     return Tuple(-x, -y, -z, -w);
 }
 
 
-// Global operators for scalar multiplication from the left
+Tuple Vector(float x, float y, float z) {
+    return Tuple(x, y, z, 0);
+}
+Tuple Point(float x, float y, float z) {
+    return Tuple(x,y,z, 1);
+}
+
+Tuple Color(float x, float y, float z) {
+    return Tuple(x, y, z, 0);
+}
+
+Tuple Tuple::cross(const Tuple& other) const {
+    return Vector(y * other.z - z * other.y,
+                  z * other.x - x * other.z,
+                  x * other.y - y * other.x);
+}
+
+
 Tuple operator*(float scalar, const Tuple& tuple) {
     return Tuple(tuple.x * scalar, tuple.y * scalar, tuple.z * scalar, tuple.w * scalar);
 }
 
 Tuple operator*(int scalar, const Tuple& tuple) {
     return Tuple(tuple.x * scalar, tuple.y * scalar, tuple.z * scalar, tuple.w * scalar);
+}
+
+std::ostream& operator<<(std::ostream& os, const Tuple& p) {
+    os << "(" << p.x << ", " << p.y << ", " << p.z << ", " << p.w << ")";
+    return os;
 }

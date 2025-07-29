@@ -26,5 +26,24 @@ target_link_libraries(
   GTest::gtest_main
 )
 
+add_executable(
+  screen_test
+  screen_test.cc
+  ../src/utils/math.cpp
+  ../src/screen/canvas.cpp
+)
+target_link_libraries(
+  screen_test
+  GTest::gtest_main
+)
+
+# Add the tick simulation executable
+add_executable(
+  tick
+  tick.cpp
+  ../src/utils/math.cpp
+  ../src/screen/canvas.cpp
+)
+
 include(GoogleTest)
 gtest_discover_tests(math_test)
