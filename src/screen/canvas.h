@@ -11,7 +11,9 @@ struct Canvas {
     
     Canvas(int width, int height);
 
-    void writePixel(int x, int y, const Tuple& color);
+    std::vector<Tuple>& operator[](int i);
+    const std::vector<Tuple>& operator[](int i ) const;
+
     void canvasToPPM();
 };
 

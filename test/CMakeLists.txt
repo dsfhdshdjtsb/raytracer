@@ -44,6 +44,12 @@ add_executable(
   ../src/utils/math.cpp
   ../src/screen/canvas.cpp
 )
+add_executable(
+  clock
+  clock_test.cc
+  ../src/utils/math.cpp
+  ../src/screen/canvas.cpp
+)
 
 include(GoogleTest)
 gtest_discover_tests(math_test)

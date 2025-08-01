@@ -12,10 +12,13 @@ Canvas::Canvas(int width, int height) {
     buffer = std::vector<std::vector<Tuple>>(height, std::vector<Tuple>(width));
 }
 
-void Canvas::writePixel(int x, int y, const Tuple& color) {
-    buffer[y][x] = color;
+std::vector<Tuple>& Canvas::operator[](int i) {
+    return buffer[i];
 }
 
+const std::vector<Tuple>& Canvas::operator[](int i ) const {
+    return buffer[i];
+}
 int digits(int d) {
     if(d >= 100 ) {
         return 3;

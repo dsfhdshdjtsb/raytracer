@@ -14,7 +14,7 @@ TEST(ScreenTest, initCanvas) {
         }
     }
 
-    c.writePixel(1, 1, Color(1,0,0));
+    c[1][1] = Color(1,0,0);
     EXPECT_EQ(Color(1,0,0), c.buffer[1][1]);
 }
 
@@ -24,9 +24,9 @@ TEST(ScreenTest, ppmTest) {
     Tuple c2 = Color(0, 0.5, 0);
     Tuple c3 = Color(-0.5, 0, 1);
 
-    c.writePixel(0, 0, c1);
-    c.writePixel(2, 1, c2);
-    c.writePixel(4, 2, c3);
+    c[0][0] = c1;
+    c[2][1] = c2;
+    c[4][2] = c3;
 
     c.canvasToPPM();
 

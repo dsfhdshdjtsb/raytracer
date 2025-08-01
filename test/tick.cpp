@@ -32,7 +32,7 @@ int main() {
         proj = tick(e, proj);
         if(proj.position.x >= 0 && proj.position.x <= 900
         && proj.position.y >= 0 && proj.position.y <= 550) {
-            c.writePixel(proj.position.x, 550 - proj.position.y, c1);
+            c[proj.position.x][550 - proj.position.y] = c1;
         }
         std::cout << proj.position << std::endl;
     }
