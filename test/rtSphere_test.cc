@@ -15,7 +15,7 @@ int main() {
     Tuple color = Color(1,0,0);
 
     Sphere sphere;
-    sphere.set_transform(Translation(half_h, half_w, 0) * Scaling(80, 100,1) * Shearing(10, 10, 5, 5, 14, 14));
+    sphere.set_transform(Translation(half_h, half_w, 0) * Scaling(80, 100,1) * Shearing(2, 1, 3, 0, 0, 0));
 
     for(int i = 0; i < HEIGHT; i++) {
         for(int j = 0; j < WIDTH; j++) {
