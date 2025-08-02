@@ -287,23 +287,23 @@ Matrix Scaling(float x, float y, float z) {
 Matrix Rotation_x(float rads) {
     return Matrix({
         {1, 0, 0, 0},
-        {0, cos(rads), -sin(rads), 0},
-        {0, sin(rads), cos(rads), 0},
+        {0, cosf(rads), -sinf(rads), 0},
+        {0, sinf(rads), cosf(rads), 0},
         {0, 0, 0, 1},
     });
 }
 Matrix Rotation_y(float rads) {
     return Matrix({
-        {cos(rads), 0, sin(rads), 0},
+        {cosf(rads), 0, sinf(rads), 0},
         {0, 1, 0, 0},
-        {-sin(rads), 0, cos(rads), 0},
+        {-sinf(rads), 0, cosf(rads), 0},
         {0, 0, 0, 1},
     });
 }
 Matrix Rotation_z(float rads) {
     return Matrix({
-        {cos(rads), -sin(rads), 0, 0},
-        {sin(rads), cos(rads), 0, 0},
+        {cosf(rads), -sinf(rads), 0, 0},
+        {sinf(rads), cosf(rads), 0, 0},
         {0, 0, 1, 0},
         {0, 0, 0, 1},
     });
@@ -312,7 +312,7 @@ Matrix Shearing(float xy, float xz, float yx, float yz, float zx, float zy) {
     return Matrix({
         {1, xy, xz, 0},
         {yx, 1, yz, 0},
-        {zx, zy, 1, 0},
+        {zx, 0, 1, 0},
         {0, 0, 0, 1},
     });
 }

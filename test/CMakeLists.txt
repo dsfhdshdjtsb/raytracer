@@ -16,6 +16,8 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
+
+# ------------ TESTS ------------ 
 add_executable(
   math_test 
   math_test.cc
@@ -23,6 +25,18 @@ add_executable(
 )
 target_link_libraries(
   math_test 
+  GTest::gtest_main
+)
+
+add_executable(
+  ray_test
+  ray_test.cc
+  ../src/utils/math.cpp
+  ../src/utils/ray.cpp
+  ../src/utils/shape.cpp
+)
+target_link_libraries(
+  ray_test
   GTest::gtest_main
 )
 
@@ -37,7 +51,8 @@ target_link_libraries(
   GTest::gtest_main
 )
 
-# Add the tick simulation executable
+# -------------------------
+
 add_executable(
   tick
   tick.cpp
@@ -50,6 +65,15 @@ add_executable(
   ../src/utils/math.cpp
   ../src/screen/canvas.cpp
 )
+add_executable(
+  rtSphere
+  rtSphere_test.cc
+  ../src/utils/math.cpp
+  ../src/screen/canvas.cpp
+  ../src/utils/ray.cpp
+  ../src/utils/shape.cpp
+)
+
 
 include(GoogleTest)
 gtest_discover_tests(math_test)

@@ -72,9 +72,11 @@ Matrix Scaling(float x, float y, float z);
 Matrix Rotation_x(float rads);
 Matrix Rotation_y(float rads);
 Matrix Rotation_z(float rads);
+Matrix Shearing(float xy, float xz, float yx, float yz, float zx, float zy);
 
 extern const Matrix IDENTITY_MATRIX;
 
 std::ostream& operator<<(std::ostream& os, const Matrix& p);
+
 #endif
 
