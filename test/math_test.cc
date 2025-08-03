@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "../src/utils/math.h"
-
+#include <math.h>
 TEST(Tuples, TupleWithW1IsPoint) {
     Tuple a(4.3, -4.2, 3.1, 1.0);
     EXPECT_FLOAT_EQ(a.x, 4.3);
@@ -157,4 +157,11 @@ TEST(Transformations, Translation) {
     EXPECT_EQ(vec, transformation * vec);
 
     //TODO: SCALING AND OTHER TRANSFOMRATIONS
+}
+
+TEST(Vectors, Reflections) {
+    Tuple v = Vector(0, -1, 0);
+    Tuple n = Vector(sqrt(2)/2, sqrt(2)/2, 0);
+    Tuple r = v.reflect(n);
+    EXPECT_EQ(Vector(1,0,0), r);
 }

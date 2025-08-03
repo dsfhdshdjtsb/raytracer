@@ -123,6 +123,9 @@ Tuple Tuple::cross(const Tuple& other) const {
                   z * other.x - x * other.z,
                   x * other.y - y * other.x);
 }
+Tuple Tuple::reflect(const Tuple& normal) const {
+    return *this - normal * 2 * this->dot(normal);
+}
 
 Tuple operator*(float scalar, const Tuple& tuple) {
     return Tuple(tuple.x * scalar, tuple.y * scalar, tuple.z * scalar, tuple.w * scalar);

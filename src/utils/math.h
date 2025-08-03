@@ -31,6 +31,7 @@ struct Tuple {
     Tuple operator-() const;
 
     Tuple cross(const Tuple& other) const;
+    Tuple reflect(const Tuple& normal) const;
 };
 
 Tuple operator*(float scalar, const Tuple& tuple);

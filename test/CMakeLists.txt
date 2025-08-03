@@ -51,6 +51,19 @@ target_link_libraries(
   GTest::gtest_main
 )
 
+add_executable(
+  shape_test 
+  shape_test.cc
+  ../src/utils/math.cpp
+  ../src/utils/ray.cpp
+  ../src/utils/shape.cpp
+  ../src/utils/light.cpp
+)
+target_link_libraries(
+  shape_test
+  GTest::gtest_main
+)
+
 # -------------------------
 
 add_executable(
@@ -72,6 +85,7 @@ add_executable(
   ../src/screen/canvas.cpp
   ../src/utils/ray.cpp
   ../src/utils/shape.cpp
+  ../src/utils/light.cpp
 )
 
 

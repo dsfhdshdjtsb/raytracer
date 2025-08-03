@@ -43,16 +43,17 @@ TEST(Rays, intersection) {
     EXPECT_EQ(xs[1].t, -4);
 }
 
-TEST(Rays, Intersections) {
+TEST(Rays, intersections) {
     Sphere s;
-
-    Intersection i1 = Intersection(5, s);
-    Intersection i2 = Intersection(7, s);
-    Intersection i3 = Intersection(-3, s);
-    Intersection i4 = Intersection(2, s);
+    std::shared_ptr<Sphere> s_ptr = std::make_shared<Sphere>(s);
+    Intersection i1 = Intersection(5, s_ptr);
+    Intersection i2 = Intersection(7, s_ptr);
+    Intersection i3 = Intersection(-3, s_ptr);
+    Intersection i4 = Intersection(2, s_ptr);
     Intersections xs = {i1, i2, i3, i4};
-    EXPECT_EQ(xs.hit(), i4);
+    EXPECT_EQ(i4, xs.hit());
 }
+
 
 TEST(Rays, Transformations) {
     Ray r = Ray(Point(1,2,3), Vector(0,1,0));
