@@ -8,6 +8,7 @@ struct PointLight {
     Tuple position;
 
     PointLight(Tuple i, Tuple p);
+    PointLight();
 };
 
 #endif

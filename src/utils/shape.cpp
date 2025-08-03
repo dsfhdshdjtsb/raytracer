@@ -40,8 +40,22 @@ Shape::Shape() : material(Material()), transform(IDENTITY_MATRIX) {}
 
 Intersection::Intersection(float t, std::shared_ptr<Shape> c): t(t), object(c) {}
 
-// Copy constructor for Intersection
 Intersection::Intersection(const Intersection& other) : t(other.t), object(other.object) {}
+
+Computations Intersection::prepare_computations(const Ray& r) const {
+    Tuple point = r.position(this->t);
+    Tuple eyev = -r.direction;
+    Tuple normalv = this->object->normal_at(point);
+    bool inside = false;
+    if(normalv.dot(eyev) < 0) {
+        inside = true;
+        normalv = -normalv;
+    } 
+    Computations res(this->t, this->object, point, eyev, normalv, inside);
+    return res;
+}
+
+Computations::Computations(float t, std::shared_ptr<Shape> object, Tuple point, Tuple eyev, Tuple normalv, bool inside) : t(t), object(object), point(point), eyev(eyev), normalv(normalv), inside(inside) {}
 
 bool Intersection::operator==(const Intersection& other) const {
     if(t - other.t >= EPSILON) return false;

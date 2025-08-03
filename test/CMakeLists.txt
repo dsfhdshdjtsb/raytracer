@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.14)
 project(my_project)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 # GoogleTest requires at least C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -72,9 +74,27 @@ add_executable(
   ../src/utils/shape.cpp
   ../src/utils/light.cpp
   ../src/scene/world.cpp
+  ../src/scene/camera.cpp
+  ../src/screen/canvas.cpp
 )
 target_link_libraries(
   world_test
+  GTest::gtest_main
+)
+
+add_executable(
+  unit_tests 
+  unit_tests.cc
+  ../src/utils/math.cpp
+  ../src/utils/ray.cpp
+  ../src/utils/shape.cpp
+  ../src/utils/light.cpp
+  ../src/scene/world.cpp
+  ../src/scene/camera.cpp
+  ../src/screen/canvas.cpp
+)
+target_link_libraries(
+  unit_tests 
   GTest::gtest_main
 )
 
@@ -100,6 +120,17 @@ add_executable(
   ../src/utils/ray.cpp
   ../src/utils/shape.cpp
   ../src/utils/light.cpp
+)
+add_executable(
+  first_scene 
+  ./renders/first_scene.cc
+  ../src/utils/math.cpp
+  ../src/utils/ray.cpp
+  ../src/utils/shape.cpp
+  ../src/utils/light.cpp
+  ../src/scene/world.cpp
+  ../src/scene/camera.cpp
+  ../src/screen/canvas.cpp
 )
 
 

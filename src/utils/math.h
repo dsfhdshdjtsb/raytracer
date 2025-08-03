@@ -74,6 +74,7 @@ Matrix Rotation_x(float rads);
 Matrix Rotation_y(float rads);
 Matrix Rotation_z(float rads);
 Matrix Shearing(float xy, float xz, float yx, float yz, float zx, float zy);
+Matrix ViewTransform(const Tuple& from, const Tuple& to, const Tuple& up);
 
 extern const Matrix IDENTITY_MATRIX;
 

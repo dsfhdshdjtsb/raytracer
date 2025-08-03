@@ -4,6 +4,7 @@
 
 #include "math.h"
 #include "light.h"
+#include "ray.h"
 #include <math.h>
 #include <set>
 #include <memory>
@@ -45,6 +46,15 @@ struct Sphere : public Shape {
     Tuple normal_at(const Tuple& point) const;
 };
 
+struct Computations {
+    float t;
+    std::shared_ptr<Shape> object;
+    Tuple point, eyev, normalv;
+    bool inside;
+
+    Computations(float t, std::shared_ptr<Shape> object, Tuple point, Tuple eyev, Tuple normalv, bool inside);
+};
+
 struct Intersection {
     std::shared_ptr<Shape> object;
     float t;
@@ -52,6 +62,7 @@ struct Intersection {
     Intersection(float t, std::shared_ptr<Shape> c);
     Intersection(const Intersection& other);
     bool operator==(const Intersection& other) const;
+    Computations prepare_computations(const Ray& r) const;
 };
 
 struct IntersectionComparator {

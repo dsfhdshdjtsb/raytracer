@@ -1,9 +1,57 @@
 #include "world.h"
+#include <vector>
+#include <memory>
 #include "../utils/math.h"
 #include "../utils/ray.h"
 #include "../utils/shape.h"
+#include "../utils/light.h"
+#include "../screen/canvas.h"
+#include "../scene/camera.h"
 
-World::World() : light(Color(1,1,1), Point(-10,10, -10)) {
+World::World() {}
+
+Tuple World::shade_hit(const Computations& comp) const {
+    return comp.object->material.lighting(this->light, comp.point, comp.eyev, comp.normalv);
+}
+
+Tuple World::color_at(const Ray& r) const {
+    Intersections rs = intersect_world(r);
+    if(rs.size() == 0) { //might have to deal with negatives?
+        return Color(0,0,0);
+    }
+    Intersection hit = rs.hit(); 
+    Computations comps = hit.prepare_computations(r);
+    return shade_hit(comps);
+}
+
+Canvas World::render() const {
+    Canvas canvas(camera.hsize, camera.vsize);
+
+    for(int i = 0; i < camera.hsize; i++) {
+        for(int j = 0; j < camera.vsize; j++) {
+            Ray r = camera.ray_for_pixel(i, j);
+            Tuple color = this->color_at(r);
+            canvas[j][i] = color;
+        }
+    }
+    return canvas;
+}
+
+Intersections World::intersect_world(const Ray& r) const {
+    Intersections result;
+    for(std::shared_ptr<Shape> shape : objects) {
+        
+        const Intersections& is = r.intersect(shape);
+        for(const Intersection& i : is)  {
+            result.insert(i);
+        }
+    }
+    return result;
+}
+
+World DefaultWorld() {
+    World w;
+    w.light = PointLight(Color(1,1,1), Point(-10, 10, -10));
 
     Sphere s1;
     Material m(Color(0.8, 1, 0.6), 0.1, 0.7, 0.2, 200);
@@ -12,20 +60,8 @@ World::World() : light(Color(1,1,1), Point(-10,10, -10)) {
     Sphere s2;
     s2.set_transform(Scaling(0.5, 0.5, 0.5));
 
-    objects.push_back(std::make_shared<Sphere>(s1));
-    objects.push_back(std::make_shared<Sphere>(s2));
-}
+    w.objects.push_back(std::make_shared<Sphere>(s2));
+    w.objects.push_back(std::make_shared<Sphere>(s1));
 
-Intersections World::intersect_world(Ray& r) const {
-    Intersections result;
-    for(std::shared_ptr<Shape> shape : objects) {
-        
-        const Intersections& is = r.intersect(shape);
-        std::cout << is.size() <<std::endl;
-        for(const Intersection& i : is)  {
-            result.insert(i);
-        }
-    }
-    return result;
+    return w;
 }
-

@@ -320,6 +320,21 @@ Matrix Shearing(float xy, float xz, float yx, float yz, float zx, float zy) {
     });
 }
 
+Matrix ViewTransform(const Tuple& from, const Tuple& to, const Tuple& up) {
+    Tuple forward = (to - from).normalize();
+    Tuple upn = up.normalize();
+    Tuple left = forward.cross(upn);
+    Tuple true_up = left.cross(forward);
+
+    Matrix orientation ({
+        {left.x, left.y, left.z, 0},
+        {true_up.x, true_up.y, true_up.z, 0},
+        {-forward.x, -forward.y, -forward.z, 0},
+        {0,0,0,1}
+    });
+    return orientation * Translation(-from.x, -from.y, -from.z);
+}
+
 std::ostream& operator<<(std::ostream& os, const Matrix& p) {
     for(int i = 0; i < p.height; i++) {
         os << "| ";

@@ -165,3 +165,18 @@ TEST(Vectors, Reflections) {
     Tuple r = v.reflect(n);
     EXPECT_EQ(Vector(1,0,0), r);
 }
+
+TEST(Matrices, ViewSpace) {
+    Tuple from = Point(1, 3, 2);
+    Tuple to = Point(4, -2, 8);
+    Tuple up = Point(1, 1, 0);
+
+    Matrix t = ViewTransform(from, to, up);
+
+    EXPECT_EQ(Matrix({
+        {-0.50709 , 0.50709, 0.67612,-2.36643 },
+        { 0.76772, 0.60609, 0.12122, -2.82843},
+        { -0.35857, 0.59761, -0.71714, 0.00000},
+        { 0.00000, 0,0 , 1.00000}
+    }), t);
+}
