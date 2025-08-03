@@ -3,8 +3,10 @@
 
 #include "math.h"
 #include <vector>
+#include <memory>
 
 struct Intersection;
+struct Intersections;
 struct Shape;
 
 struct Ray {
@@ -15,7 +17,7 @@ struct Ray {
 
     Tuple position(float t);
     Ray transform(const Matrix& m) const;
-    std::vector<Intersection> intersect(Shape& c);
+    std::vector<Intersection> intersect(const std::shared_ptr<Shape> c) const;
 };
 
 #endif

@@ -64,6 +64,20 @@ target_link_libraries(
   GTest::gtest_main
 )
 
+add_executable(
+  world_test 
+  world_test.cc
+  ../src/utils/math.cpp
+  ../src/utils/ray.cpp
+  ../src/utils/shape.cpp
+  ../src/utils/light.cpp
+  ../src/scene/world.cpp
+)
+target_link_libraries(
+  world_test
+  GTest::gtest_main
+)
+
 # -------------------------
 
 add_executable(

@@ -3,6 +3,7 @@
 #include "../src/utils/ray.h"
 #include "../src/utils/shape.h"
 #include "../src/utils/light.h"
+#include <memory>
 
 int HEIGHT = 500;
 int WIDTH = 500;
@@ -20,8 +21,8 @@ int main() {
     //mat.shininess = 100;
     PointLight light(Color(1,1,1), Point(-100, 200, -200));
 
-    Sphere sphere;
-    sphere.set_transform(Translation(half_h, half_w, 0) * Scaling(100, 100, 100));
+    std::shared_ptr<Shape> sphere = std::make_shared<Sphere>();
+    sphere->set_transform(Translation(half_h, half_w, 0) * Scaling(100, 100, 100));
 
     for(int i = 0; i < HEIGHT; i++) {
         for(int j = 0; j < WIDTH; j++) {
@@ -33,7 +34,7 @@ int main() {
             if(is.size() == 0) continue;
 
             Tuple point = r.position(is.hit().t);
-            Tuple normalv = sphere.normal_at(point);
+            Tuple normalv = sphere->normal_at(point);
 
             Tuple res = mat.lighting(light, point, eyev, normalv);
 

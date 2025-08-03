@@ -10,6 +10,7 @@
 
 struct Ray;
 struct Intersection;
+struct Intersections;
 
 struct Material {
     Tuple color;
@@ -28,7 +29,7 @@ struct Shape {
 
     virtual bool operator==(const Shape& other) const;
     void set_transform(const Matrix& t);
-    virtual std::vector<Intersection> intersect(const Ray& r) const;
+    virtual std::vector<float> intersect(const Ray& r) const;
     virtual Tuple normal_at(const Tuple& point) const;
     void set_material(Material material);
 };
@@ -40,7 +41,7 @@ struct Sphere : public Shape {
 
     Sphere();
     bool operator==(const Shape& other) const;
-    std::vector<Intersection> intersect(const Ray& r) const;
+    std::vector<float> intersect(const Ray& r) const;
     Tuple normal_at(const Tuple& point) const;
 };
 
@@ -65,8 +66,21 @@ struct Intersections {
     Intersections();
     Intersections(std::vector<Intersection> list);
 
-    void insert(Intersection intersection);
+    void insert(const Intersection& intersection);
     Intersection hit();
     int size() const;
+
+    struct Iterator {
+        using SetIter = std::set<Intersection, IntersectionComparator>::iterator;
+        SetIter pos_it, pos_end;
+        SetIter neg_it, neg_end;
+
+        Iterator(SetIter pos_it, SetIter pos_end, SetIter neg_it, SetIter neg_end);
+        Intersection operator*() const;
+        Iterator& operator++();
+        bool operator!=(const Iterator& other) const;
+    };
+    Iterator begin() const;
+    Iterator end() const;
 };
 #endif
