@@ -20,7 +20,7 @@ struct Material {
 
     Material(Tuple c, float a, float d, float sp, float sh);
 
-    Tuple lighting(PointLight light, Tuple point, Tuple eyev, Tuple normalv) const;
+    Tuple lighting(PointLight light, Tuple point, Tuple eyev, Tuple normalv, bool in_shadow) const;
 };
 
 struct Shape {
@@ -49,10 +49,10 @@ struct Sphere : public Shape {
 struct Computations {
     float t;
     std::shared_ptr<Shape> object;
-    Tuple point, eyev, normalv;
+    Tuple point, eyev, normalv, over_point;
     bool inside;
 
-    Computations(float t, std::shared_ptr<Shape> object, Tuple point, Tuple eyev, Tuple normalv, bool inside);
+    Computations(float t, std::shared_ptr<Shape> object, Tuple point, Tuple over_point, Tuple eyev, Tuple normalv, bool inside);
 };
 
 struct Intersection {
@@ -79,6 +79,7 @@ struct Intersections {
 
     void insert(const Intersection& intersection);
     Intersection hit();
+    bool has_hit() const;
     int size() const;
 
     struct Iterator {

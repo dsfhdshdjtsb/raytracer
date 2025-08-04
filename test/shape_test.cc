@@ -27,19 +27,23 @@ TEST(Shapes, Shading) {
     PointLight light = PointLight(Color(1,1,1), Point(0,10,-10));
     Material mat;
 
-    Tuple result = mat.lighting(light, pos, eyev, normalv);
+    Tuple result = mat.lighting(light, pos, eyev, normalv, false);
     EXPECT_EQ(Color(0.7364, 0.7364,0.7364), result); //light and eye angled
 
     light = PointLight(Color(1,1,1), Point(0,0,10));
-    result = mat.lighting(light, pos, eyev, normalv);
+    result = mat.lighting(light, pos, eyev, normalv, false);
     EXPECT_EQ(Color(0.1,0.1,0.1), result); //light behind mat
 
     eyev = Vector(0, 1, -1).normalize();
     light = PointLight(Color(1,1,1), Point(0,0,-10));
-    result = mat.lighting(light, pos, eyev, normalv);
+    result = mat.lighting(light, pos, eyev, normalv, false);
     EXPECT_EQ(Color(1,1,1), result);
 
 
+    eyev = Vector(0, 1, -1).normalize();
+    light = PointLight(Color(1,1,1), Point(0,0,-10));
+    result = mat.lighting(light, pos, eyev, normalv, true);
+    EXPECT_EQ(Color(0.1,0.1,0.1), result);
 }
 
 

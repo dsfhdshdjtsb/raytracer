@@ -24,6 +24,7 @@ struct World {
     Tuple color_at(const Ray& r) const;
 
     Canvas render() const;
+    bool is_shadowed(Tuple point) const;
 };
 
 World DefaultWorld();

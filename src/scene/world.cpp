@@ -11,7 +11,23 @@
 World::World() {}
 
 Tuple World::shade_hit(const Computations& comp) const {
-    return comp.object->material.lighting(this->light, comp.point, comp.eyev, comp.normalv);
+    bool shadow = is_shadowed(comp.over_point);
+    return comp.object->material.lighting(this->light, comp.over_point, comp.eyev, comp.normalv, shadow);
+}
+
+bool World::is_shadowed(Tuple point) const {
+    Tuple dir = (light.position - point).normalize();
+    float mag = (light.position - point).magnitude();
+
+    Ray r(point, dir);
+    Intersections rs = intersect_world(r);
+    if(rs.has_hit()) {
+        Intersection hit = rs.hit();
+        if(hit.t < mag) {
+            return true;
+        } 
+    } 
+    return false;
 }
 
 Tuple World::color_at(const Ray& r) const {

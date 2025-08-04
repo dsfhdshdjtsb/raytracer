@@ -28,10 +28,10 @@ int main() {
     floor->material.color = Color(1, 0.9, 0.9);
     floor->material.specular = 0;
 
-    left_wall->transform = Translation(0, 0, 5) * Rotation_y(- M_PI / 4) * Rotation_x(M_PI / 2) * Scaling(10, 0.01, 10);
+    left_wall->transform = Translation(0, 0, 5) * Rotation_y(- M_PI / 4) * Rotation_x(M_PI / 2) * Scaling(10, 0.02, 10);
     left_wall->material = floor->material;
 
-    right_wall->transform = Translation(0,0,5) * Rotation_y(M_PI / 4) * Rotation_x(M_PI / 2) * Scaling(10,0.01, 10);
+    right_wall->transform = Translation(0,0,5) * Rotation_y(M_PI / 4) * Rotation_x(M_PI / 2) * Scaling(10,0.02, 10);
     right_wall->material = floor->material;
 
     middle->transform = Translation(-0.5, 1, 0.5);

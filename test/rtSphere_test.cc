@@ -36,7 +36,7 @@ int main() {
             Tuple point = r.position(is.hit().t);
             Tuple normalv = sphere->normal_at(point);
 
-            Tuple res = mat.lighting(light, point, eyev, normalv);
+            Tuple res = mat.lighting(light, point, eyev, normalv, false);
 
             c[i][j] = res;
         }

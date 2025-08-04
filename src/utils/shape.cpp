@@ -51,11 +51,12 @@ Computations Intersection::prepare_computations(const Ray& r) const {
         inside = true;
         normalv = -normalv;
     } 
-    Computations res(this->t, this->object, point, eyev, normalv, inside);
+    Tuple op = point + normalv * (EPSILON + 0.001); //this is bad
+    Computations res(this->t, this->object, point, op, eyev, normalv, inside);
     return res;
 }
 
-Computations::Computations(float t, std::shared_ptr<Shape> object, Tuple point, Tuple eyev, Tuple normalv, bool inside) : t(t), object(object), point(point), eyev(eyev), normalv(normalv), inside(inside) {}
+Computations::Computations(float t, std::shared_ptr<Shape> object, Tuple point, Tuple over_point, Tuple eyev, Tuple normalv, bool inside) : t(t), object(object), point(point), over_point(over_point), eyev(eyev), normalv(normalv), inside(inside) {}
 
 bool Intersection::operator==(const Intersection& other) const {
     if(t - other.t >= EPSILON) return false;
@@ -95,7 +96,9 @@ int Intersections::size() const {
 Intersection Intersections::hit() {
     return *pos.begin();
 }
-
+bool Intersections::has_hit() const{
+    return !pos.empty();
+}
 
 bool IntersectionComparator::operator()(const Intersection& a, const Intersection& b) const {
     return a.t < b.t;
@@ -156,14 +159,17 @@ Tuple Sphere::normal_at(const Tuple& point) const {
     return normal.normalize();
 }
     
-Tuple Material::lighting(PointLight light, Tuple point, Tuple eyev, Tuple normalv) const {
+Tuple Material::lighting(PointLight light, Tuple point, Tuple eyev, Tuple normalv, bool in_shadow) const {
     
     Tuple effective_color = color * light.intensity;
 
-    Tuple lightv = (light.position - point).normalize();
     Tuple diffuse_color, specular_color, ambient_color;
     ambient_color = effective_color * ambient;
+    if(in_shadow) {
+        return ambient_color;
+    }
 
+    Tuple lightv = (light.position - point).normalize();
     float light_dot_normal = (lightv.dot(normalv));
     if (light_dot_normal < 0) {
         diffuse_color = Color(0,0,0);
