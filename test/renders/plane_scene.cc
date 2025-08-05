@@ -22,10 +22,15 @@ int main() {
     right = std::make_shared<Sphere>();
     left = std::make_shared<Sphere>();
 
-    w.objects = {floor, left_wall, right_wall, middle, right, left};
+    w.objects = {floor, middle, right, left};
+
+    std::shared_ptr<Pattern> pat = std::make_shared<Checkers>(Color(0.9,0.3,0.5), Color(0,0.6,0.8));
+    std::shared_ptr<Pattern> pat2 = std::make_shared<Gradient>(Color(0,0.8,0.7), Color(0.6,0.0,0.6));
+    pat2->transform = Scaling(2,2,2) * Translation(0.5,0,0);
 
     floor->material = Material();
-    floor->material.color = Color(1, 0.9, 0.9);
+    //floor->material.set_color(Color(1,0.9,0.9));
+    floor->material.pattern = pat;
     floor->material.specular = 0;
 
     left_wall->transform = Translation(0, 0, 5) * Rotation_y(- M_PI / 4) * Rotation_x(M_PI / 2);
@@ -36,25 +41,26 @@ int main() {
 
     middle->transform = Translation(-0.5, 1, 0.5);
     middle->material = Material();
-    middle->material.color = Color(0.1, 1, 0.5);
+    //middle->material.set_color(Color(0.1, 1, 0.5));
+    middle->material.pattern = pat2;
     middle->material.diffuse = 0.7;
     middle->material.specular = 0.3;
 
     right->transform = Translation(1.5, 0.5, -0.5) * Scaling(.5, 0.5,.5);
     right->material = Material();
-    right->material.color = Color(0.5, 1, 0.1);
+    right->material.set_color(Color(0.5, 1, 0.1));
     right->material.diffuse = 0.7;
     right->material.specular = 0.3;
 
     left->transform = Translation(-1.5, 0.33, -0.75) * Scaling(0.33, 0.33, 0.33);
     left->material = Material();
-    left->material.color = Color(1, 0.8, 0.1);
+    left->material.set_color(Color(1, 0.8, 0.1));
     left->material.diffuse = 0.7;
     left->material.specular = .3;
 
     w.light = PointLight(Color(1,1,1), Point(-10, 10, -10));
 
-    w.camera = Camera(200, 100, M_PI / 3);
+    w.camera = Camera(400, 200, M_PI / 3);
     w.camera.transform = ViewTransform(Point(0, 1.5, -5),  Point(0,1,0), Vector(0,1,0));
 
     Canvas image = w.render();

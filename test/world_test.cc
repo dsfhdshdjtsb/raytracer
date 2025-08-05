@@ -51,6 +51,6 @@ TEST(World, ColorAt) {
 
     r = Ray(Point(0,0,0.75), Vector(0,0,-1));
     c = w.color_at(r);
-    EXPECT_EQ(w.objects[0]->material.color, c);
+    EXPECT_EQ(Color(1,1,1), c);
 }
 

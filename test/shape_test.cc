@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <memory.h>
 #include "../src/utils/math.h"
 #include "../src/utils/ray.h"
 #include "../src/utils/shape.h"
@@ -26,23 +27,25 @@ TEST(Shapes, Shading) {
     Tuple normalv = Vector(0,0,-1);
     PointLight light = PointLight(Color(1,1,1), Point(0,10,-10));
     Material mat;
-
-    Tuple result = mat.lighting(light, pos, eyev, normalv, false);
+    
+    std::shared_ptr<Shape> sphere = std::make_shared<Sphere>();
+    sphere->material = mat;
+    Tuple result = mat.lighting(light, sphere, pos, eyev, normalv, false);
     EXPECT_EQ(Color(0.7364, 0.7364,0.7364), result); //light and eye angled
 
     light = PointLight(Color(1,1,1), Point(0,0,10));
-    result = mat.lighting(light, pos, eyev, normalv, false);
+    result = mat.lighting(light,sphere, pos, eyev, normalv, false);
     EXPECT_EQ(Color(0.1,0.1,0.1), result); //light behind mat
 
     eyev = Vector(0, 1, -1).normalize();
     light = PointLight(Color(1,1,1), Point(0,0,-10));
-    result = mat.lighting(light, pos, eyev, normalv, false);
+    result = mat.lighting(light,sphere, pos, eyev, normalv, false);
     EXPECT_EQ(Color(1,1,1), result);
 
 
     eyev = Vector(0, 1, -1).normalize();
     light = PointLight(Color(1,1,1), Point(0,0,-10));
-    result = mat.lighting(light, pos, eyev, normalv, true);
+    result = mat.lighting(light, sphere, pos, eyev, normalv, true);
     EXPECT_EQ(Color(0.1,0.1,0.1), result);
 }
 

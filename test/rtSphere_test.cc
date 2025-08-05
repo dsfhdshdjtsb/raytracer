@@ -17,7 +17,7 @@ int main() {
     Tuple color = Color(1,0,0);
 
     Material mat;
-    mat.color = Color(1,1,0.2);
+    mat.set_color(Color(1,1,0.2));
     //mat.shininess = 100;
     PointLight light(Color(1,1,1), Point(-100, 200, -200));
 
@@ -36,7 +36,7 @@ int main() {
             Tuple point = r.position(is.hit().t);
             Tuple normalv = sphere->normal_at(point);
 
-            Tuple res = mat.lighting(light, point, eyev, normalv, false);
+            Tuple res = mat.lighting(light, sphere, point, eyev, normalv, false);
 
             c[i][j] = res;
         }

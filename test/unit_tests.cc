@@ -9,6 +9,7 @@
 #include "../src/utils/shape.h"
 #include "../src/scene/camera.h"
 #include "../src/screen/canvas.h"
+#include "../src/utils/pattern.h"
 
 TEST(Cameras, Construction) {
     Camera c(200, 125, M_PI / 2) ;
@@ -85,4 +86,10 @@ TEST(World, ShadowOffset) {
     Computations comps = i.prepare_computations(r) ;
     EXPECT_LT( comps.over_point.z, -EPSILON / 2);
     EXPECT_GT(comps.point.z, comps.over_point.z);
+}
+
+TEST(Patterns, Patterns) {
+    std::shared_ptr<Pattern> pat = std::make_shared<Gradient>(Color(1,1,1), Color(0,0,0));
+    EXPECT_EQ(pat->color_at(Point(0,0,0)), Color(1,1,1)); 
+    EXPECT_EQ(pat->color_at(Point(0.5,0,0)), Color(0.5,0.5,0.5));
 }

@@ -5,6 +5,7 @@
 #include "math.h"
 #include "light.h"
 #include "ray.h"
+#include "pattern.h"
 #include <math.h>
 #include <set>
 #include <memory>
@@ -14,13 +15,15 @@ struct Intersection;
 struct Intersections;
 
 struct Material {
-    Tuple color;
+    std::shared_ptr<Pattern> pattern;
     float ambient, diffuse, specular, shininess;
     Material();
 
-    Material(Tuple c, float a, float d, float sp, float sh);
+    Material(const Tuple& c, float a, float d, float sp, float sh);
+    Material(std::shared_ptr<Pattern> pattern, float a, float d, float sp, float sh);
 
-    Tuple lighting(PointLight light, Tuple point, Tuple eyev, Tuple normalv, bool in_shadow) const;
+    Tuple lighting(PointLight light, std::shared_ptr<Shape> object, Tuple point, Tuple eyev, Tuple normalv, bool in_shadow) const;
+    void set_color(Tuple color);
 };
 
 struct Shape {
@@ -28,12 +31,13 @@ struct Shape {
     Matrix transform;
     Shape();
     virtual ~Shape() {}
-    
+
     virtual bool operator==(const Shape& other) const;
     void set_transform(const Matrix& t);
     virtual std::vector<float> intersect(const Ray& r) const;
     virtual Tuple normal_at(const Tuple& point) const;
-    void set_material(Material material);
+    void set_material(const Material& material);
+    Tuple color_at(const Tuple& point) const;
 };
 
 

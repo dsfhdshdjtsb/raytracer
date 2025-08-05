@@ -12,7 +12,7 @@ World::World() {}
 
 Tuple World::shade_hit(const Computations& comp) const {
     bool shadow = is_shadowed(comp.over_point);
-    return comp.object->material.lighting(this->light, comp.over_point, comp.eyev, comp.normalv, shadow);
+    return comp.object->material.lighting(this->light, comp.object, comp.over_point, comp.eyev, comp.normalv, shadow);
 }
 
 bool World::is_shadowed(Tuple point) const {

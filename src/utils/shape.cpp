@@ -1,5 +1,6 @@
 #include "shape.h"
 #include "ray.h"
+#include "pattern.h"
 #include "math.h"
 #include <math.h>
 
@@ -31,10 +32,17 @@ Intersections::Iterator Intersections::end() const {
     return Iterator(pos.end(), pos.end(), neg.end(), neg.end());
 }
 
+Material::Material(std::shared_ptr<Pattern> pattern, float a, float d, float sp, float sh) : ambient(a), diffuse(d), specular(sp), shininess(sh) {
+    this->pattern = pattern;
+}
 
-Material::Material(Tuple c, float a, float d, float sp, float sh) : color(c), ambient(a), diffuse(d), specular(sp), shininess(sh) {}
+Material::Material(const Tuple& c, float a, float d, float sp, float sh) : ambient(a), diffuse(d), specular(sp), shininess(sh) {
+    pattern = std::make_shared<Solid>(c);
+}
 
-Material::Material() : color(Color(1,1,1)), ambient(0.1), diffuse(0.9), specular(0.9), shininess(200) {}
+Material::Material() : ambient(0.1), diffuse(0.9), specular(0.9), shininess(200) {
+    pattern = std::make_shared<Solid>(Color(1,1,1));
+}
 
 Shape::Shape() : material(Material()), transform(IDENTITY_MATRIX) {}
 
@@ -108,8 +116,12 @@ bool Shape::operator==(const Shape& other) const { return false;};
 std::vector<float> Shape::intersect(const Ray& r) const {return {};}
 Tuple Shape::normal_at(const Tuple& point) const { return Tuple(0,0,0,0);}
 
-void Shape::set_material(Material mat) {
+void Shape::set_material(const Material& mat) {
     material = mat;
+}
+Tuple Shape::color_at(const Tuple& point) const {
+    Tuple transformed = material.pattern->transform.inverse() * transform.inverse() * point;
+    return material.pattern->color_at(transformed);
 }
 
 void Shape::set_transform(const Matrix& t) {
@@ -180,9 +192,9 @@ Tuple Plane::normal_at(const Tuple& point) const {
 }
 
 
-Tuple Material::lighting(PointLight light, Tuple point, Tuple eyev, Tuple normalv, bool in_shadow) const {
+Tuple Material::lighting(PointLight light, std::shared_ptr<Shape> object, Tuple point, Tuple eyev, Tuple normalv, bool in_shadow) const {
     
-    Tuple effective_color = color * light.intensity;
+    Tuple effective_color = object->color_at(point) * light.intensity;
 
     Tuple diffuse_color, specular_color, ambient_color;
     ambient_color = effective_color * ambient;
@@ -210,4 +222,7 @@ Tuple Material::lighting(PointLight light, Tuple point, Tuple eyev, Tuple normal
     }
     return ambient_color + diffuse_color + specular_color;
 
+}
+void Material::set_color(Tuple color) {
+    pattern = std::make_shared<Solid>(color);
 }

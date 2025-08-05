@@ -25,7 +25,7 @@ int main() {
 
     floor->transform = Scaling(10, 0.01,10);
     floor->material = Material();
-    floor->material.color = Color(1, 0.9, 0.9);
+    floor->material.set_color(Color(1,0.9,0.9));
     floor->material.specular = 0;
 
     left_wall->transform = Translation(0, 0, 5) * Rotation_y(- M_PI / 4) * Rotation_x(M_PI / 2) * Scaling(10, 0.02, 10);
@@ -36,19 +36,19 @@ int main() {
 
     middle->transform = Translation(-0.5, 1, 0.5);
     middle->material = Material();
-    middle->material.color = Color(0.1, 1, 0.5);
+    middle->material.set_color(Color(0.1, 1, 0.5));
     middle->material.diffuse = 0.7;
     middle->material.specular = 0.3;
 
     right->transform = Translation(1.5, 0.5, -0.5) * Scaling(.5, 0.5,.5);
     right->material = Material();
-    right->material.color = Color(0.5, 1, 0.1);
+    right->material.set_color(Color(0.5, 1, 0.1));
     right->material.diffuse = 0.7;
     right->material.specular = 0.3;
 
     left->transform = Translation(-1.5, 0.33, -0.75) * Scaling(0.33, 0.33, 0.33);
     left->material = Material();
-    left->material.color = Color(1, 0.8, 0.1);
+    left->material.set_color(Color(1, 0.8, 0.1));
     left->material.diffuse = 0.7;
     left->material.specular = .3;
 

@@ -36,6 +36,7 @@ add_executable(
   ../src/utils/math.cpp
   ../src/utils/ray.cpp
   ../src/utils/shape.cpp
+  ../src/utils/pattern.cpp
 )
 target_link_libraries(
   ray_test
@@ -60,6 +61,7 @@ add_executable(
   ../src/utils/ray.cpp
   ../src/utils/shape.cpp
   ../src/utils/light.cpp
+  ../src/utils/pattern.cpp
 )
 target_link_libraries(
   shape_test
@@ -76,6 +78,7 @@ add_executable(
   ../src/scene/world.cpp
   ../src/scene/camera.cpp
   ../src/screen/canvas.cpp
+  ../src/utils/pattern.cpp
 )
 target_link_libraries(
   world_test
@@ -92,6 +95,7 @@ add_executable(
   ../src/scene/world.cpp
   ../src/scene/camera.cpp
   ../src/screen/canvas.cpp
+  ../src/utils/pattern.cpp
 )
 target_link_libraries(
   unit_tests 
@@ -120,6 +124,7 @@ add_executable(
   ../src/utils/ray.cpp
   ../src/utils/shape.cpp
   ../src/utils/light.cpp
+  ../src/utils/pattern.cpp
 )
 add_executable(
   first_scene 
@@ -131,6 +136,7 @@ add_executable(
   ../src/scene/world.cpp
   ../src/scene/camera.cpp
   ../src/screen/canvas.cpp
+  ../src/utils/pattern.cpp
 )
 
 add_executable(
@@ -143,8 +149,15 @@ add_executable(
   ../src/scene/world.cpp
   ../src/scene/camera.cpp
   ../src/screen/canvas.cpp
+  ../src/utils/pattern.cpp
 )
 
 
 include(GoogleTest)
 gtest_discover_tests(math_test)
+gtest_discover_tests(math_test)
+gtest_discover_tests(ray_test)
+gtest_discover_tests(screen_test)
+gtest_discover_tests(shape_test)
+gtest_discover_tests(world_test)
+gtest_discover_tests(unit_tests)
