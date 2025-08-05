@@ -133,6 +133,18 @@ add_executable(
   ../src/screen/canvas.cpp
 )
 
+add_executable(
+  plane_scene 
+  ./renders/plane_scene.cc
+  ../src/utils/math.cpp
+  ../src/utils/ray.cpp
+  ../src/utils/shape.cpp
+  ../src/utils/light.cpp
+  ../src/scene/world.cpp
+  ../src/scene/camera.cpp
+  ../src/screen/canvas.cpp
+)
+
 
 include(GoogleTest)
 gtest_discover_tests(math_test)

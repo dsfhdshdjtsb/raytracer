@@ -27,7 +27,8 @@ struct Shape {
     Material material;
     Matrix transform;
     Shape();
-
+    virtual ~Shape() {}
+    
     virtual bool operator==(const Shape& other) const;
     void set_transform(const Matrix& t);
     virtual std::vector<float> intersect(const Ray& r) const;
@@ -42,6 +43,12 @@ struct Sphere : public Shape {
 
     Sphere();
     bool operator==(const Shape& other) const;
+    std::vector<float> intersect(const Ray& r) const;
+    Tuple normal_at(const Tuple& point) const;
+};
+
+struct Plane : public Shape {
+    Plane();
     std::vector<float> intersect(const Ray& r) const;
     Tuple normal_at(const Tuple& point) const;
 };

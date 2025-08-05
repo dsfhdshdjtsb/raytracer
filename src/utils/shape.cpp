@@ -106,7 +106,7 @@ bool IntersectionComparator::operator()(const Intersection& a, const Intersectio
 
 bool Shape::operator==(const Shape& other) const { return false;};
 std::vector<float> Shape::intersect(const Ray& r) const {return {};}
-Tuple Shape::normal_at(const Tuple& point) const {return Tuple(0,0,0,0);}
+Tuple Shape::normal_at(const Tuple& point) const { return Tuple(0,0,0,0);}
 
 void Shape::set_material(Material mat) {
     material = mat;
@@ -146,7 +146,6 @@ std::vector<float> Sphere::intersect(const Ray& ray) const {
     float t1 = ( -b - sqrt(discriminant)) / (2 * a);
     float t2 = ( -b + sqrt(discriminant)) / (2 * a);
 
-    std::shared_ptr<Sphere> shape = std::make_shared<Sphere>(*this);
     return {t1, t2};
 }
 
@@ -159,6 +158,28 @@ Tuple Sphere::normal_at(const Tuple& point) const {
     return normal.normalize();
 }
     
+Plane::Plane() {
+    transform = IDENTITY_MATRIX;
+}
+
+std::vector<float> Plane::intersect(const Ray& r) const {
+    Ray transformed = r.transform(transform.inverse());
+
+    if(abs(transformed.direction.y) - 0 < EPSILON) {
+        return {};
+    }
+
+    float t = - transformed.origin.y / transformed.direction.y;
+    return {t};
+}
+
+Tuple Plane::normal_at(const Tuple& point) const {
+    Tuple normal = transform.inverse().T() * Vector(0,1,0);
+    normal.w = 0;
+    return normal.normalize();
+}
+
+
 Tuple Material::lighting(PointLight light, Tuple point, Tuple eyev, Tuple normalv, bool in_shadow) const {
     
     Tuple effective_color = color * light.intensity;

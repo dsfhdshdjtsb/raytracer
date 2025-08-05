@@ -32,7 +32,7 @@ bool World::is_shadowed(Tuple point) const {
 
 Tuple World::color_at(const Ray& r) const {
     Intersections rs = intersect_world(r);
-    if(rs.size() == 0) { //might have to deal with negatives?
+    if(!rs.has_hit()) { //might have to deal with negatives?
         return Color(0,0,0);
     }
     Intersection hit = rs.hit(); 
