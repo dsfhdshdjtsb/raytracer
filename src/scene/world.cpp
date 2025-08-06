@@ -49,7 +49,7 @@ Tuple World::color_at(const Ray& r, int remaining) const {
         return Color(0,0,0);
     }
     Intersection hit = rs.hit(); 
-    Computations comps = hit.prepare_computations(r);
+    Computations comps = hit.prepare_computations(r, rs);
     return shade_hit(comps, remaining);
 }
 
@@ -83,7 +83,7 @@ World DefaultWorld() {
     w.light = PointLight(Color(1,1,1), Point(-10, 10, -10));
 
     Sphere s1;
-    Material m(Color(0.8, 1, 0.6), 0.1, 0.7, 0.2, 200, 0);
+    Material m(Color(0.8, 1, 0.6), 0.1, 0.7, 0.2, 200, 0, 0, 1);
     s1.set_material(m);
 
     Sphere s2;

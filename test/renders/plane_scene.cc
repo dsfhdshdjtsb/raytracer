@@ -51,6 +51,7 @@ int main() {
     right->material.set_color(Color(0.5, 1, 0.1));
     right->material.diffuse = 0.7;
     right->material.specular = 0.3;
+    right->material.reflective = 1;
 
     left->transform = Translation(-1.5, 0.33, -0.75) * Scaling(0.33, 0.33, 0.33);
     left->material = Material();
@@ -60,7 +61,7 @@ int main() {
 
     w.light = PointLight(Color(1,1,1), Point(-10, 10, -10));
 
-    w.camera = Camera(300, 150, M_PI / 3);
+    w.camera = Camera(500, 250, M_PI / 3);
     w.camera.transform = ViewTransform(Point(0, 1.5, -5),  Point(0,1,0), Vector(0,1,0)) * Translation(0,0, 3);
 
     Canvas image = w.render();

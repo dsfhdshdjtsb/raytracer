@@ -73,6 +73,7 @@ TEST(World, shadows) {
 
     Ray r(Point(0,0,5), Vector(0,0,1));
     Intersection i(4, s2);
+    std::cout<< "here";
     Computations comps = i.prepare_computations(r);
     Tuple c = w.shade_hit(comps, 5);
     EXPECT_EQ(Color(0.1,0.1,0.1), c);
@@ -150,4 +151,48 @@ TEST(Reflection, reflected_color_for_reflective_material) {
     Computations comps = i.prepare_computations(r);
     Tuple color = w.reflected_color(comps);
     EXPECT_EQ(Color(0.19032, 0.2379, 0.14274), color);
+}
+
+
+TEST(Refraction, n1_n2_at_various_intersections) {
+
+    auto A = GlassSphere();
+    A->transform = Scaling(2,2,2);
+    A->material.refractive_index = 1.5;
+
+    auto B = GlassSphere();
+    B->transform = Translation(0,0,-0.25);
+    B->material.refractive_index = 2.0;
+
+    auto C = GlassSphere();
+    C->transform = Translation(0,0,0.25);
+    C->material.refractive_index = 2.5;
+
+    Ray r = Ray(Point(0,0,-4), Vector(0,0,1));
+
+    std::vector<Intersection> xs_vec = {
+        Intersection(2.0, A),
+        Intersection(2.75, B),
+        Intersection(3.25, C),
+        Intersection(4.75, B),
+        Intersection(5.25, C),
+        Intersection(6.0, A)
+    };
+    Intersections xs = xs_vec;
+
+    struct Example { int index; double n1; double n2; };
+    std::vector<Example> examples = {
+        {0, 1.0, 1.5},
+        {1, 1.5, 2.0},
+        {2, 2.0, 2.5},
+        {3, 2.5, 2.5},
+        {4, 2.5, 1.5},
+        {5, 1.5, 1.0}
+    };
+
+    for (const auto& ex : examples) {
+        Computations comps = xs_vec[ex.index].prepare_computations(r, xs);
+        EXPECT_DOUBLE_EQ(comps.n1, ex.n1);
+        EXPECT_DOUBLE_EQ(comps.n2, ex.n2);
+    }
 }

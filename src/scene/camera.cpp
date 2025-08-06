@@ -4,7 +4,7 @@
 #include "../utils/ray.h"
 void Camera::set_pixel_size(int hsize, int vsize, double field_of_view) {
     double half_view = tan(field_of_view / 2);
-    double aspect = (float)(hsize) / vsize;
+    double aspect = (double)(hsize) / vsize;
 
     if(aspect >= 1){ 
         half_width = half_view;

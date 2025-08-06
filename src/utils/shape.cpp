@@ -3,6 +3,8 @@
 #include "pattern.h"
 #include "math.h"
 #include <math.h>
+#include <list>
+#include <algorithm>
 
 Intersections::Iterator::Iterator(SetIter pos_it, SetIter pos_end, SetIter neg_it, SetIter neg_end)
     : pos_it(pos_it), pos_end(pos_end), neg_it(neg_it), neg_end(neg_end) {}
@@ -32,15 +34,15 @@ Intersections::Iterator Intersections::end() const {
     return Iterator(pos.end(), pos.end(), neg.end(), neg.end());
 }
 
-Material::Material(std::shared_ptr<Pattern> pattern, double a, double d, double sp, double sh, double rf) : ambient(a), diffuse(d), specular(sp), shininess(sh), reflective(rf) {
+Material::Material(std::shared_ptr<Pattern> pattern, double a, double d, double sp, double sh, double rf, double tr, double re_i) : ambient(a), diffuse(d), specular(sp), shininess(sh), reflective(rf), transparency(tr), refractive_index(re_i) {
     this->pattern = pattern;
 }
 
-Material::Material(const Tuple& c, double a, double d, double sp, double sh, double rf) : ambient(a), diffuse(d), specular(sp), shininess(sh), reflective(rf) {
+Material::Material(const Tuple& c, double a, double d, double sp, double sh, double rf, double tr, double re_i) : ambient(a), diffuse(d), specular(sp), shininess(sh), reflective(rf), transparency(tr), refractive_index(re_i) {
     pattern = std::make_shared<Solid>(c);
 }
 
-Material::Material() : ambient(0.1), diffuse(0.9), specular(0.9), shininess(200) {
+Material::Material() : ambient(0.1), diffuse(0.9), specular(0.9), shininess(200), transparency(0), refractive_index(1) {
     pattern = std::make_shared<Solid>(Color(1,1,1));
 }
 
@@ -50,7 +52,38 @@ Intersection::Intersection(double t, std::shared_ptr<Shape> c): t(t), object(c) 
 
 Intersection::Intersection(const Intersection& other) : t(other.t), object(other.object) {}
 
-Computations Intersection::prepare_computations(const Ray& r) const {
+Computations Intersection::prepare_computations(const Ray& r, const Intersections& xs) const {
+    double n1, n2;
+    n1 = 1;
+    n2 = 1;
+    std::list<std::shared_ptr<Shape>> containers;
+    std::shared_ptr<Shape> hit;
+    hit = this->object;
+    for(const Intersection& x : xs) {
+        if(x.object == hit && abs(x.t - this->t) < EPSILON)  {
+            if(containers.empty()) {
+                n1 = 1;
+            } else {
+                n1 = containers.back()->material.refractive_index;
+            }
+        }
+        auto iter = std::find(containers.begin(), containers.end(), x.object);
+        if(iter != containers.end()) {
+            containers.erase(iter);
+            
+        } else {
+            containers.insert(containers.end(), x.object);
+        }
+
+        if(x.object == hit && abs(x.t - this->t) < EPSILON) {
+            if(containers.empty()) {
+                n2 = 1;
+            } else {
+                n2 = containers.back()->material.refractive_index;
+            }
+            break;
+        }
+    }
     Tuple point = r.position(this->t);
     Tuple eyev = -r.direction;
     Tuple normalv = this->object->normal_at(point);
@@ -60,12 +93,12 @@ Computations Intersection::prepare_computations(const Ray& r) const {
         inside = true;
         normalv = -normalv;
     } 
-    Tuple op = point + normalv * (EPSILON); //this is bad
-    Computations res(this->t, this->object, point, op, eyev, normalv, reflectv, inside);
+    Tuple op = point + normalv * (EPSILON); 
+    Computations res(this->t, this->object, point, op, eyev, normalv, reflectv, inside, n1, n2);
     return res;
 }
 
-Computations::Computations(double t, std::shared_ptr<Shape> object, Tuple point, Tuple over_point, Tuple eyev, Tuple normalv, Tuple reflectv, bool inside) : t(t), object(object), point(point), over_point(over_point), eyev(eyev), normalv(normalv), reflectv(reflectv), inside(inside) {}
+Computations::Computations(double t, std::shared_ptr<Shape> object, Tuple point, Tuple over_point, Tuple eyev, Tuple normalv, Tuple reflectv, bool inside, double n1, double n2) : t(t), object(object), point(point), over_point(over_point), eyev(eyev), normalv(normalv), reflectv(reflectv), inside(inside), n1(n1), n2(n2) {}
 
 bool Intersection::operator==(const Intersection& other) const {
     if(t - other.t >= EPSILON) return false;
@@ -102,7 +135,7 @@ int Intersections::size() const {
     return pos.size() + neg.size();
 }
 
-Intersection Intersections::hit() {
+Intersection Intersections::hit() const {
     return *pos.begin();
 }
 bool Intersections::has_hit() const{
@@ -170,7 +203,12 @@ Tuple Sphere::normal_at(const Tuple& point) const {
     normal.w = 0; //avoid weirdness if transform matrix has translation
     return normal.normalize();
 }
-    
+std::shared_ptr<Shape> GlassSphere() {
+    std::shared_ptr<Shape> glass =  std::make_shared<Sphere>();
+    glass->material.transparency = 1.0;
+    glass->material.refractive_index = 1.5;
+    return glass;
+} 
 Plane::Plane() {
     transform = IDENTITY_MATRIX;
 }

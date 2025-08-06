@@ -16,11 +16,11 @@ struct Intersections;
 
 struct Material {
     std::shared_ptr<Pattern> pattern;
-    double ambient, diffuse, specular, shininess, reflective;
+    double ambient, diffuse, specular, shininess, reflective, transparency, refractive_index;
     Material();
 
-    Material(const Tuple& c, double a, double d, double sp, double sh, double rf);
-    Material(std::shared_ptr<Pattern> pattern, double a, double d, double sp, double sh, double rf);
+    Material(const Tuple& c, double a, double d, double sp, double sh, double rf, double tr, double re_i);
+    Material(std::shared_ptr<Pattern> pattern, double a, double d, double sp, double sh, double rf, double tr, double re_i );
 
     Tuple lighting(PointLight light, std::shared_ptr<Shape> object, Tuple point, Tuple eyev, Tuple normalv, bool in_shadow) const;
     void set_color(Tuple color);
@@ -51,6 +51,8 @@ struct Sphere : public Shape {
     Tuple normal_at(const Tuple& point) const;
 };
 
+std::shared_ptr<Shape> GlassSphere();
+
 struct Plane : public Shape {
     Plane();
     std::vector<double> intersect(const Ray& r) const;
@@ -61,19 +63,10 @@ struct Computations {
     double t;
     std::shared_ptr<Shape> object;
     Tuple point, eyev, normalv, over_point, reflectv;
+    double n1,n2;
     bool inside;
 
-    Computations(double t, std::shared_ptr<Shape> object, Tuple point, Tuple over_point, Tuple eyev, Tuple normalv, Tuple reflectv, bool inside);
-};
-
-struct Intersection {
-    std::shared_ptr<Shape> object;
-    double t;
-
-    Intersection(double t, std::shared_ptr<Shape> c);
-    Intersection(const Intersection& other);
-    bool operator==(const Intersection& other) const;
-    Computations prepare_computations(const Ray& r) const;
+    Computations(double t, std::shared_ptr<Shape> object, Tuple point, Tuple over_point, Tuple eyev, Tuple normalv, Tuple reflectv, bool inside, double n1, double n2);
 };
 
 struct IntersectionComparator {
@@ -89,7 +82,7 @@ struct Intersections {
     Intersections(std::vector<Intersection> list);
 
     void insert(const Intersection& intersection);
-    Intersection hit();
+    Intersection hit() const;
     bool has_hit() const;
     int size() const;
 
@@ -106,4 +99,15 @@ struct Intersections {
     Iterator begin() const;
     Iterator end() const;
 };
+
+struct Intersection {
+    std::shared_ptr<Shape> object;
+    double t;
+
+    Intersection(double t, std::shared_ptr<Shape> c);
+    Intersection(const Intersection& other);
+    bool operator==(const Intersection& other) const;
+    Computations prepare_computations(const Ray& r, const Intersections& xs = {}) const;
+};
+
 #endif
