@@ -74,7 +74,7 @@ TEST(World, shadows) {
     Ray r(Point(0,0,5), Vector(0,0,1));
     Intersection i(4, s2);
     Computations comps = i.prepare_computations(r);
-    Tuple c = w.shade_hit(comps);
+    Tuple c = w.shade_hit(comps, 5);
     EXPECT_EQ(Color(0.1,0.1,0.1), c);
 }
 
@@ -92,4 +92,62 @@ TEST(Patterns, Patterns) {
     std::shared_ptr<Pattern> pat = std::make_shared<Gradient>(Color(1,1,1), Color(0,0,0));
     EXPECT_EQ(pat->color_at(Point(0,0,0)), Color(1,1,1)); 
     EXPECT_EQ(pat->color_at(Point(0.5,0,0)), Color(0.5,0.5,0.5));
+}
+
+TEST(Reflection, simple) {
+    World w = DefaultWorld();
+    Ray r = Ray(Point(0,0,0), Vector(0,0,1));
+    std::shared_ptr<Shape> s = w.objects[1];
+    s->material.ambient = 1;
+    Intersection i = Intersection(1, s);
+    Computations comps = i.prepare_computations(r);
+    Tuple c = w.reflected_color(comps, 5);
+    EXPECT_EQ(Color(0,0,0), c);
+}
+
+TEST(Reflection, infRecursion) {
+    World w = DefaultWorld();
+    w.light = PointLight(Color(1,1,1), Point(0,0,0));
+
+    std::shared_ptr<Shape> lower = std::make_shared<Plane>();
+    lower->material.reflective = 1;
+    lower->transform = Translation(0,-1,0);
+
+    std::shared_ptr<Shape> upper = std::make_shared<Plane>();
+    upper->material.reflective = 1;
+    upper->transform = Translation(0,1,0);
+
+    w.objects = {lower, upper};
+
+    Ray r = Ray(Point(0,0,0), Vector(0,1,0));
+    Tuple c = w.color_at(r, 5);
+    //testing for no error
+}
+
+TEST(Reflection, shade_hit) {
+    World w = DefaultWorld();
+    std::shared_ptr<Shape> shape = std::make_shared<Plane>();
+    shape->material.reflective = 0.5;
+    shape->transform = Translation(0, -1, 0);
+    w.objects.push_back(shape);
+
+    Ray r = Ray(Point(0,0,-3), Vector(0, -sqrt(2)/2, sqrt(2)/2));
+    Intersection i  = Intersection(sqrt(2), shape);
+    Computations comps = i.prepare_computations(r);
+    Tuple color = w.shade_hit(comps);
+    EXPECT_EQ(Color(0.87677, 0.92436, 0.82918), color);
+}
+
+TEST(Reflection, reflected_color_for_reflective_material) {
+    World w = DefaultWorld();
+    std::shared_ptr<Shape> shape = std::make_shared<Plane>();
+    shape->material.reflective = 0.5;
+    shape->transform = Translation(0, -1, 0);
+    w.objects.push_back(shape);
+
+    Ray r = Ray(Point(0, 0, -3), Vector(0, -sqrt(2)/2, sqrt(2)/2));
+    Intersection i = Intersection(sqrt(2), shape);
+    Computations comps = i.prepare_computations(r);
+    Tuple color = w.reflected_color(comps);
+    EXPECT_EQ(Color(0.19032, 0.2379, 0.14274), color);
 }

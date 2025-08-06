@@ -32,11 +32,11 @@ Intersections::Iterator Intersections::end() const {
     return Iterator(pos.end(), pos.end(), neg.end(), neg.end());
 }
 
-Material::Material(std::shared_ptr<Pattern> pattern, float a, float d, float sp, float sh) : ambient(a), diffuse(d), specular(sp), shininess(sh) {
+Material::Material(std::shared_ptr<Pattern> pattern, double a, double d, double sp, double sh, double rf) : ambient(a), diffuse(d), specular(sp), shininess(sh), reflective(rf) {
     this->pattern = pattern;
 }
 
-Material::Material(const Tuple& c, float a, float d, float sp, float sh) : ambient(a), diffuse(d), specular(sp), shininess(sh) {
+Material::Material(const Tuple& c, double a, double d, double sp, double sh, double rf) : ambient(a), diffuse(d), specular(sp), shininess(sh), reflective(rf) {
     pattern = std::make_shared<Solid>(c);
 }
 
@@ -46,7 +46,7 @@ Material::Material() : ambient(0.1), diffuse(0.9), specular(0.9), shininess(200)
 
 Shape::Shape() : material(Material()), transform(IDENTITY_MATRIX) {}
 
-Intersection::Intersection(float t, std::shared_ptr<Shape> c): t(t), object(c) {}
+Intersection::Intersection(double t, std::shared_ptr<Shape> c): t(t), object(c) {}
 
 Intersection::Intersection(const Intersection& other) : t(other.t), object(other.object) {}
 
@@ -54,17 +54,18 @@ Computations Intersection::prepare_computations(const Ray& r) const {
     Tuple point = r.position(this->t);
     Tuple eyev = -r.direction;
     Tuple normalv = this->object->normal_at(point);
+    Tuple reflectv = r.direction.reflect(normalv);
     bool inside = false;
     if(normalv.dot(eyev) < 0) {
         inside = true;
         normalv = -normalv;
     } 
-    Tuple op = point + normalv * (EPSILON + 0.001); //this is bad
-    Computations res(this->t, this->object, point, op, eyev, normalv, inside);
+    Tuple op = point + normalv * (EPSILON); //this is bad
+    Computations res(this->t, this->object, point, op, eyev, normalv, reflectv, inside);
     return res;
 }
 
-Computations::Computations(float t, std::shared_ptr<Shape> object, Tuple point, Tuple over_point, Tuple eyev, Tuple normalv, bool inside) : t(t), object(object), point(point), over_point(over_point), eyev(eyev), normalv(normalv), inside(inside) {}
+Computations::Computations(double t, std::shared_ptr<Shape> object, Tuple point, Tuple over_point, Tuple eyev, Tuple normalv, Tuple reflectv, bool inside) : t(t), object(object), point(point), over_point(over_point), eyev(eyev), normalv(normalv), reflectv(reflectv), inside(inside) {}
 
 bool Intersection::operator==(const Intersection& other) const {
     if(t - other.t >= EPSILON) return false;
@@ -113,7 +114,7 @@ bool IntersectionComparator::operator()(const Intersection& a, const Intersectio
 }
 
 bool Shape::operator==(const Shape& other) const { return false;};
-std::vector<float> Shape::intersect(const Ray& r) const {return {};}
+std::vector<double> Shape::intersect(const Ray& r) const {return {};}
 Tuple Shape::normal_at(const Tuple& point) const { return Tuple(0,0,0,0);}
 
 void Shape::set_material(const Material& mat) {
@@ -139,24 +140,24 @@ bool Sphere::operator==(const Shape& other) const {
 }
 
 
-std::vector<float> Sphere::intersect(const Ray& ray) const {
+std::vector<double> Sphere::intersect(const Ray& ray) const {
     Ray transformed = ray.transform(transform.inverse());
     Tuple transformed_origin = transformed.origin;
     Tuple transformed_direction = transformed.direction;
 
     Tuple sphere_to_ray = transformed_origin - center;
 
-    float a = transformed_direction.dot(transformed_direction);
-    float b = 2 * transformed_direction.dot(sphere_to_ray);
-    float c = sphere_to_ray.dot(sphere_to_ray) - r * r;
+    double a = transformed_direction.dot(transformed_direction);
+    double b = 2 * transformed_direction.dot(sphere_to_ray);
+    double c = sphere_to_ray.dot(sphere_to_ray) - r * r;
 
-    float discriminant = b * b - 4 * a * c;
+    double discriminant = b * b - 4 * a * c;
     if(discriminant < 0) {
         return {};
     }
 
-    float t1 = ( -b - sqrt(discriminant)) / (2 * a);
-    float t2 = ( -b + sqrt(discriminant)) / (2 * a);
+    double t1 = ( -b - sqrt(discriminant)) / (2 * a);
+    double t2 = ( -b + sqrt(discriminant)) / (2 * a);
 
     return {t1, t2};
 }
@@ -174,14 +175,14 @@ Plane::Plane() {
     transform = IDENTITY_MATRIX;
 }
 
-std::vector<float> Plane::intersect(const Ray& r) const {
+std::vector<double> Plane::intersect(const Ray& r) const {
     Ray transformed = r.transform(transform.inverse());
 
     if(abs(transformed.direction.y) - 0 < EPSILON) {
         return {};
     }
 
-    float t = - transformed.origin.y / transformed.direction.y;
+    double t = - transformed.origin.y / transformed.direction.y;
     return {t};
 }
 
@@ -203,7 +204,7 @@ Tuple Material::lighting(PointLight light, std::shared_ptr<Shape> object, Tuple 
     }
 
     Tuple lightv = (light.position - point).normalize();
-    float light_dot_normal = (lightv.dot(normalv));
+    double light_dot_normal = (lightv.dot(normalv));
     if (light_dot_normal < 0) {
         diffuse_color = Color(0,0,0);
         specular_color = Color(0,0,0);
@@ -211,11 +212,11 @@ Tuple Material::lighting(PointLight light, std::shared_ptr<Shape> object, Tuple 
         diffuse_color = effective_color * diffuse * light_dot_normal;
          
         Tuple reflectv = (-lightv).reflect(normalv);
-        float reflect_dot_eye = reflectv.dot(eyev);
+        double reflect_dot_eye = reflectv.dot(eyev);
         if(reflect_dot_eye <= 0) {
             specular_color = Color(0,0,0);
         } else {
-            float factor = pow(reflect_dot_eye, shininess);
+            double factor = pow(reflect_dot_eye, shininess);
             specular_color = light.intensity * specular * factor;
 
         }

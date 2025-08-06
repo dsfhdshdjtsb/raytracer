@@ -10,7 +10,7 @@ const Matrix IDENTITY_MATRIX({
 });
 
 /*--------------------TUPLE-----------------*/
-Tuple::Tuple(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+Tuple::Tuple(double x, double y, double z, double w) : x(x), y(y), z(z), w(w) {}
 
 Tuple::Tuple() : x(0), y(0), z(0), w(0) {}
 
@@ -22,7 +22,7 @@ bool Tuple::isVector() const {
     return w == 0.0f;
 }
 
-float& Tuple::operator[](int i) {
+double& Tuple::operator[](int i) {
     switch(i) {
         case 0:
             return this->x;
@@ -40,7 +40,7 @@ float& Tuple::operator[](int i) {
             throw std::invalid_argument("invalid tuple index");
     }
 }
-const float& Tuple::operator[](int i) const {
+const double& Tuple::operator[](int i) const {
     switch(i) {
         case 0:
             return this->x;
@@ -59,16 +59,16 @@ const float& Tuple::operator[](int i) const {
     }
 }
 
-float Tuple::magnitude() const {
+double Tuple::magnitude() const {
     return sqrt((x * x) + (y * y) + (z * z)); //ignores w
 }
 
 Tuple Tuple::normalize() const {
-    float mag = this->magnitude();
+    double mag = this->magnitude();
     return Tuple(x / mag, y / mag, z / mag, w / mag); //w should be 0
 }
 
-float Tuple::dot(const Tuple& other) const {
+double Tuple::dot(const Tuple& other) const {
     return x * other.x + y * other.y + z * other.z + w * other.w;
 }
 
@@ -91,7 +91,7 @@ Tuple Tuple::operator*(const Tuple& other) const {
     return Tuple(x * other.x, y * other.y, z * other.z, w * other.w);
 }
 
-Tuple Tuple::operator*(float scalar) const {
+Tuple Tuple::operator*(double scalar) const {
     return Tuple(x * scalar, y * scalar, z * scalar, w * scalar);
 }
 
@@ -99,7 +99,7 @@ Tuple Tuple::operator*(float scalar) const {
     //return Tuple(x * scalar, y * scalar, z * scalar, w * scalar);
 //}
 
-Tuple Tuple::operator/(float scalar) const {
+Tuple Tuple::operator/(double scalar) const {
     return Tuple(x / scalar, y / scalar, z / scalar, w / scalar);
 }
 
@@ -107,14 +107,14 @@ Tuple Tuple::operator-() const {
     return Tuple(-x, -y, -z, -w);
 }
 
-Tuple Vector(float x, float y, float z) {
+Tuple Vector(double x, double y, double z) {
     return Tuple(x, y, z, 0);
 }
-Tuple Point(float x, float y, float z) {
+Tuple Point(double x, double y, double z) {
     return Tuple(x,y,z, 1);
 }
 
-Tuple Color(float x, float y, float z) {
+Tuple Color(double x, double y, double z) {
     return Tuple(x, y, z, 0);
 }
 
@@ -127,7 +127,7 @@ Tuple Tuple::reflect(const Tuple& normal) const {
     return *this - normal * 2 * this->dot(normal);
 }
 
-Tuple operator*(float scalar, const Tuple& tuple) {
+Tuple operator*(double scalar, const Tuple& tuple) {
     return Tuple(tuple.x * scalar, tuple.y * scalar, tuple.z * scalar, tuple.w * scalar);
 }
 
@@ -142,18 +142,18 @@ std::ostream& operator<<(std::ostream& os, const Tuple& p) {
 
 /*--------------------MATRIX-----------------*/
 Matrix::Matrix(int height, int weight) {
-    v = std::vector(height, std::vector<float>(weight));
+    v = std::vector(height, std::vector<double>(weight));
     this->height = height;
     this->width = weight;
 }
 
-Matrix::Matrix(std::vector<std::vector<float>>& v) {
+Matrix::Matrix(std::vector<std::vector<double>>& v) {
     this->v = v;
     this->height = v.size();
     this->width = v[0].size();
 }
 
-Matrix::Matrix(std::initializer_list<std::vector<float>> list) {
+Matrix::Matrix(std::initializer_list<std::vector<double>> list) {
     this->v = list;
     this->height = v.size();
     this->width = v[0].size();
@@ -170,10 +170,10 @@ bool Matrix::operator==(const Matrix& other) const {
     }
     return true;
 }
-std::vector<float> & Matrix::operator[](int i) {
+std::vector<double> & Matrix::operator[](int i) {
     return v[i];
 }
-const std::vector<float>& Matrix::operator[](int i) const {
+const std::vector<double>& Matrix::operator[](int i) const {
     return v[i];
 }
 Matrix Matrix::operator*(const Matrix& other) const {
@@ -181,10 +181,10 @@ Matrix Matrix::operator*(const Matrix& other) const {
     if(this->width != other.width) throw std::invalid_argument("matrix multiplication of mismatched sizes");
     if(this->width != 4 || this->height != 4) throw std::invalid_argument("matrix multiplication only defined for size 4");
 
-    std::vector<std::vector<float>> result(4, std::vector<float>(4, 0.0f));
+    std::vector<std::vector<double>> result(4, std::vector<double>(4, 0.0f));
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
-            float sum = 0.0f;
+            double sum = 0.0f;
             for (int k = 0; k < 4; ++k) {
                 sum += this->v[i][k] * other.v[k][j];
             }
@@ -200,7 +200,7 @@ Tuple Matrix::operator*(const Tuple& other) const {
     Tuple result;
 
     for(int i = 0; i < 4; i++) {
-        float sum = 0;
+        double sum = 0;
         for(int j = 0; j < 4; j++) {
             sum += this->v[i][j] * other[j];
         }
@@ -219,9 +219,9 @@ Matrix Matrix::T() const {
     }
     return result;
 }
-float Matrix::det() const {
+double Matrix::det() const {
     if(height == 2 && width == 2) return v[0][0] * v[1][1] - v[0][1] * v[1][0];
-    float res = 0;
+    double res = 0;
     for(int i = 0; i < width; i++) { //cofactor expand across the first row cause why not
         res += v[0][i] * this->cofactor(0,i);
     }
@@ -243,10 +243,10 @@ Matrix Matrix::submatrix(int row, int col) const {
     return result;
 }
 
-float Matrix::minor(int row, int col) const {
+double Matrix::minor(int row, int col) const {
     return this->submatrix(row, col).det();
 }
-float Matrix::cofactor(int row, int col) const {
+double Matrix::cofactor(int row, int col) const {
     int sign = 1;
     if((row + col) % 2 == 1) {
         sign = -1;
@@ -255,13 +255,13 @@ float Matrix::cofactor(int row, int col) const {
 }
 
 Matrix Matrix::inverse() const {
-    float det = this->det(); 
+    double det = this->det(); 
 
     Matrix res(height, width);
 
     for(int i = 0; i < height; i++) { //height and width should be the same but whatever
         for(int j = 0; j < width; j++) {
-            float c = this->cofactor(i, j);
+            double c = this->cofactor(i, j);
 
             res[j][i] = c / det;
         }
@@ -269,7 +269,7 @@ Matrix Matrix::inverse() const {
     return res;
 }
 
-Matrix Translation(float x, float y, float z) {
+Matrix Translation(double x, double y, double z) {
     return Matrix({
         {1, 0, 0, x},
         {0, 1, 0, y},
@@ -278,7 +278,7 @@ Matrix Translation(float x, float y, float z) {
     });
 }
 
-Matrix Scaling(float x, float y, float z) {
+Matrix Scaling(double x, double y, double z) {
     return Matrix({
         {x, 0, 0, 0},
         {0, y, 0, 0},
@@ -287,31 +287,31 @@ Matrix Scaling(float x, float y, float z) {
     });
 }
 
-Matrix Rotation_x(float rads) {
+Matrix Rotation_x(double rads) {
     return Matrix({
         {1, 0, 0, 0},
-        {0, cosf(rads), -sinf(rads), 0},
-        {0, sinf(rads), cosf(rads), 0},
+        {0, cos(rads), -sin(rads), 0},
+        {0, sin(rads), cos(rads), 0},
         {0, 0, 0, 1},
     });
 }
-Matrix Rotation_y(float rads) {
+Matrix Rotation_y(double rads) {
     return Matrix({
-        {cosf(rads), 0, sinf(rads), 0},
+        {cos(rads), 0, sin(rads), 0},
         {0, 1, 0, 0},
-        {-sinf(rads), 0, cosf(rads), 0},
+        {-sin(rads), 0, cos(rads), 0},
         {0, 0, 0, 1},
     });
 }
-Matrix Rotation_z(float rads) {
+Matrix Rotation_z(double rads) {
     return Matrix({
-        {cosf(rads), -sinf(rads), 0, 0},
-        {sinf(rads), cosf(rads), 0, 0},
+        {cos(rads), -sin(rads), 0, 0},
+        {sin(rads), cos(rads), 0, 0},
         {0, 0, 1, 0},
         {0, 0, 0, 1},
     });
 }
-Matrix Shearing(float xy, float xz, float yx, float yz, float zx, float zy) {
+Matrix Shearing(double xy, double xz, double yx, double yz, double zx, double zy) {
     return Matrix({
         {1, xy, xz, 0},
         {yx, 1, yz, 0},

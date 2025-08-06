@@ -3,19 +3,19 @@
 #include <math.h>
 TEST(Tuples, TupleWithW1IsPoint) {
     Tuple a(4.3, -4.2, 3.1, 1.0);
-    EXPECT_FLOAT_EQ(a.x, 4.3);
-    EXPECT_FLOAT_EQ(a.y, -4.2);
-    EXPECT_FLOAT_EQ(a.z, 3.1);
-    EXPECT_FLOAT_EQ(a.w, 1.0);
+    EXPECT_DOUBLE_EQ(a.x, 4.3);
+    EXPECT_DOUBLE_EQ(a.y, -4.2);
+    EXPECT_DOUBLE_EQ(a.z, 3.1);
+    EXPECT_DOUBLE_EQ(a.w, 1.0);
     EXPECT_TRUE(a.isPoint());
     EXPECT_FALSE(a.isVector());
 }
 TEST(Tuples, TupleWithW0IsVector) {
     Tuple a(4.3, -4.2, 3.1, 0.0);
-    EXPECT_FLOAT_EQ(a.x, 4.3);
-    EXPECT_FLOAT_EQ(a.y, -4.2);
-    EXPECT_FLOAT_EQ(a.z, 3.1);
-    EXPECT_FLOAT_EQ(a.w, 0.0);
+    EXPECT_DOUBLE_EQ(a.x, 4.3);
+    EXPECT_DOUBLE_EQ(a.y, -4.2);
+    EXPECT_DOUBLE_EQ(a.z, 3.1);
+    EXPECT_DOUBLE_EQ(a.w, 0.0);
     EXPECT_FALSE(a.isPoint());
     EXPECT_TRUE(a.isVector());
 }
@@ -60,12 +60,12 @@ TEST(Tuples, HadamardProduct) {
 TEST(Matrices, MatrixOpers) {
     Matrix m(4,4);
 
-    std::vector<std::vector<float>> vec = {
+    std::vector<std::vector<double>> vec = {
         {1,2,3},
         {4,5,6},
         {7,8,9},
     };
-    std::vector<std::vector<float>> vec2 = {
+    std::vector<std::vector<double>> vec2 = {
         {1,2,3},
         {4,0,6},
         {7,8,9},
@@ -81,13 +81,13 @@ TEST(Matrices, MatrixOpers) {
     m2[1][1] = 5;
     EXPECT_EQ(true, m1 == m2);
 
-    std::vector<std::vector<float>> vec3 = {
+    std::vector<std::vector<double>> vec3 = {
         {1,2,3,4},
         {2,4,4,2},
         {8,6,4,1},
         {0,0,0,1},
     };
-    std::vector<std::vector<float>> vec3t = {
+    std::vector<std::vector<double>> vec3t = {
         {1,2,8,0},
         {2,4,8,0},
         {3,4,4,0},

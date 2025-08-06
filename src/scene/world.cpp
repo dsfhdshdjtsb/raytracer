@@ -10,14 +10,17 @@
 
 World::World() {}
 
-Tuple World::shade_hit(const Computations& comp) const {
+Tuple World::shade_hit(const Computations& comp, int remaining) const {
     bool shadow = is_shadowed(comp.over_point);
-    return comp.object->material.lighting(this->light, comp.object, comp.over_point, comp.eyev, comp.normalv, shadow);
+
+    Tuple surface = comp.object->material.lighting(this->light, comp.object, comp.over_point, comp.eyev, comp.normalv, shadow);
+    Tuple reflect = reflected_color(comp, --remaining);
+    return surface + reflect;
 }
 
 bool World::is_shadowed(Tuple point) const {
     Tuple dir = (light.position - point).normalize();
-    float mag = (light.position - point).magnitude();
+    double mag = (light.position - point).magnitude();
 
     Ray r(point, dir);
     Intersections rs = intersect_world(r);
@@ -29,15 +32,25 @@ bool World::is_shadowed(Tuple point) const {
     } 
     return false;
 }
+Tuple World::reflected_color(const Computations& comp, int remaining) const {
+    if(comp.object->material.reflective == 0 || remaining <= 0) {
+        return Color(0,0,0);
+    }
 
-Tuple World::color_at(const Ray& r) const {
+    Ray reflectr = Ray(comp.over_point, comp.reflectv);
+    Tuple c = color_at(reflectr, remaining);
+
+    return c * comp.object->material.reflective;
+}
+
+Tuple World::color_at(const Ray& r, int remaining) const {
     Intersections rs = intersect_world(r);
     if(!rs.has_hit()) { //might have to deal with negatives?
         return Color(0,0,0);
     }
     Intersection hit = rs.hit(); 
     Computations comps = hit.prepare_computations(r);
-    return shade_hit(comps);
+    return shade_hit(comps, remaining);
 }
 
 Canvas World::render() const {
@@ -46,7 +59,7 @@ Canvas World::render() const {
     for(int i = 0; i < camera.hsize; i++) {
         for(int j = 0; j < camera.vsize; j++) {
             Ray r = camera.ray_for_pixel(i, j);
-            Tuple color = this->color_at(r);
+            Tuple color = this->color_at(r, 5); //5 IS THE TOTAL NUMBER OF REFLECTIONS ALLOWED !!!
             canvas[j][i] = color;
         }
     }
@@ -70,7 +83,7 @@ World DefaultWorld() {
     w.light = PointLight(Color(1,1,1), Point(-10, 10, -10));
 
     Sphere s1;
-    Material m(Color(0.8, 1, 0.6), 0.1, 0.7, 0.2, 200);
+    Material m(Color(0.8, 1, 0.6), 0.1, 0.7, 0.2, 200, 0);
     s1.set_material(m);
 
     Sphere s2;

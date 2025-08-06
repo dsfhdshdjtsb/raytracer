@@ -20,11 +20,12 @@ struct World {
     World();
     Intersections intersect_world(const Ray& r) const;
     
-    Tuple shade_hit(const Computations& comp) const;
-    Tuple color_at(const Ray& r) const;
+    Tuple shade_hit(const Computations& comp, int remaining = 5) const;
+    Tuple color_at(const Ray& r, int remaining = 5) const;
 
     Canvas render() const;
     bool is_shadowed(Tuple point) const;
+    Tuple reflected_color(const Computations& comp, int remaining = 5) const;
 };
 
 World DefaultWorld();

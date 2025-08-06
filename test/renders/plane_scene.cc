@@ -13,7 +13,6 @@
 int main() {
     World w;
     std::shared_ptr<Shape> floor, left_wall, right_wall, middle, right, left;
-    
 
     floor = std::make_shared<Plane>();
     left_wall = std::make_shared<Plane>();
@@ -32,6 +31,7 @@ int main() {
     //floor->material.set_color(Color(1,0.9,0.9));
     floor->material.pattern = pat;
     floor->material.specular = 0;
+    floor->material.reflective = 1;
 
     left_wall->transform = Translation(0, 0, 5) * Rotation_y(- M_PI / 4) * Rotation_x(M_PI / 2);
     left_wall->material = floor->material;
@@ -60,8 +60,8 @@ int main() {
 
     w.light = PointLight(Color(1,1,1), Point(-10, 10, -10));
 
-    w.camera = Camera(400, 200, M_PI / 3);
-    w.camera.transform = ViewTransform(Point(0, 1.5, -5),  Point(0,1,0), Vector(0,1,0));
+    w.camera = Camera(300, 150, M_PI / 3);
+    w.camera.transform = ViewTransform(Point(0, 1.5, -5),  Point(0,1,0), Vector(0,1,0)) * Translation(0,0, 3);
 
     Canvas image = w.render();
     image.canvasToPPM();

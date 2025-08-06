@@ -12,7 +12,7 @@ int main() {
     Tuple red = Color(1, 0, 0);
 
     
-    for(float i = 0; i < 2 * M_PI; i += (M_PI / 6)) {
+    for(double i = 0; i < 2 * M_PI; i += (M_PI / 6)) {
         Tuple cur = Rotation_z(i) * p + origin; 
         c[floor(cur.x)][floor(cur.y)] = red;
     }

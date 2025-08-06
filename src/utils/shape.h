@@ -16,11 +16,11 @@ struct Intersections;
 
 struct Material {
     std::shared_ptr<Pattern> pattern;
-    float ambient, diffuse, specular, shininess;
+    double ambient, diffuse, specular, shininess, reflective;
     Material();
 
-    Material(const Tuple& c, float a, float d, float sp, float sh);
-    Material(std::shared_ptr<Pattern> pattern, float a, float d, float sp, float sh);
+    Material(const Tuple& c, double a, double d, double sp, double sh, double rf);
+    Material(std::shared_ptr<Pattern> pattern, double a, double d, double sp, double sh, double rf);
 
     Tuple lighting(PointLight light, std::shared_ptr<Shape> object, Tuple point, Tuple eyev, Tuple normalv, bool in_shadow) const;
     void set_color(Tuple color);
@@ -34,7 +34,7 @@ struct Shape {
 
     virtual bool operator==(const Shape& other) const;
     void set_transform(const Matrix& t);
-    virtual std::vector<float> intersect(const Ray& r) const;
+    virtual std::vector<double> intersect(const Ray& r) const;
     virtual Tuple normal_at(const Tuple& point) const;
     void set_material(const Material& material);
     Tuple color_at(const Tuple& point) const;
@@ -42,35 +42,35 @@ struct Shape {
 
 
 struct Sphere : public Shape {
-    float r;
+    double r;
     Tuple center;
 
     Sphere();
     bool operator==(const Shape& other) const;
-    std::vector<float> intersect(const Ray& r) const;
+    std::vector<double> intersect(const Ray& r) const;
     Tuple normal_at(const Tuple& point) const;
 };
 
 struct Plane : public Shape {
     Plane();
-    std::vector<float> intersect(const Ray& r) const;
+    std::vector<double> intersect(const Ray& r) const;
     Tuple normal_at(const Tuple& point) const;
 };
 
 struct Computations {
-    float t;
+    double t;
     std::shared_ptr<Shape> object;
-    Tuple point, eyev, normalv, over_point;
+    Tuple point, eyev, normalv, over_point, reflectv;
     bool inside;
 
-    Computations(float t, std::shared_ptr<Shape> object, Tuple point, Tuple over_point, Tuple eyev, Tuple normalv, bool inside);
+    Computations(double t, std::shared_ptr<Shape> object, Tuple point, Tuple over_point, Tuple eyev, Tuple normalv, Tuple reflectv, bool inside);
 };
 
 struct Intersection {
     std::shared_ptr<Shape> object;
-    float t;
+    double t;
 
-    Intersection(float t, std::shared_ptr<Shape> c);
+    Intersection(double t, std::shared_ptr<Shape> c);
     Intersection(const Intersection& other);
     bool operator==(const Intersection& other) const;
     Computations prepare_computations(const Ray& r) const;

@@ -15,7 +15,7 @@ struct Ray {
 
     Ray(Tuple origin, Tuple direction);
 
-    Tuple position(float t) const;
+    Tuple position(double t) const;
     Ray transform(const Matrix& m) const;
     std::vector<Intersection> intersect(const std::shared_ptr<Shape> c) const;
 };

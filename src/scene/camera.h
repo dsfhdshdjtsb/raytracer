@@ -6,14 +6,14 @@ struct Ray;
 
 struct Camera{
     int hsize, vsize;
-    float field_of_view, pixel_size, half_width, half_height;
+    double field_of_view, pixel_size, half_width, half_height;
     Matrix transform;
 
-    Camera(int hsize, int vsize, float field_of_view, Matrix transform);
-    Camera(int hsize, int vsize, float field_of_view);
+    Camera(int hsize, int vsize, double field_of_view, Matrix transform);
+    Camera(int hsize, int vsize, double field_of_view);
     Camera();
     Camera(const Camera& other);
-    void set_pixel_size(int hsize, int vsize, float field_of_view);
+    void set_pixel_size(int hsize, int vsize, double field_of_view);
     Ray ray_for_pixel(int px, int py) const;
 };
 
