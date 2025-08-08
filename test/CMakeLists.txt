@@ -152,6 +152,19 @@ add_executable(
   ../src/utils/pattern.cpp
 )
 
+add_executable(
+  scuffed_test 
+  scuffed_test.cc
+  ../src/utils/math.cpp
+  ../src/utils/ray.cpp
+  ../src/utils/shape.cpp
+  ../src/utils/light.cpp
+  ../src/scene/world.cpp
+  ../src/scene/camera.cpp
+  ../src/screen/canvas.cpp
+  ../src/utils/pattern.cpp
+)
+
 
 include(GoogleTest)
 gtest_discover_tests(math_test)

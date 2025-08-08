@@ -62,11 +62,12 @@ struct Plane : public Shape {
 struct Computations {
     double t;
     std::shared_ptr<Shape> object;
-    Tuple point, eyev, normalv, over_point, reflectv;
+    Tuple point, eyev, normalv, over_point, reflectv, under_point;
     double n1,n2;
     bool inside;
 
-    Computations(double t, std::shared_ptr<Shape> object, Tuple point, Tuple over_point, Tuple eyev, Tuple normalv, Tuple reflectv, bool inside, double n1, double n2);
+    Computations(double t, std::shared_ptr<Shape> object, Tuple point, Tuple over_point, Tuple eyev, Tuple normalv, Tuple reflectv, Tuple under_point, bool inside, double n1, double n2);
+    double schlick() const;
 };
 
 struct IntersectionComparator {

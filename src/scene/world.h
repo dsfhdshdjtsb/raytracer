@@ -18,6 +18,7 @@ struct World {
     Camera camera;
     
     World();
+
     Intersections intersect_world(const Ray& r) const;
     
     Tuple shade_hit(const Computations& comp, int remaining = 5) const;
@@ -26,6 +27,7 @@ struct World {
     Canvas render() const;
     bool is_shadowed(Tuple point) const;
     Tuple reflected_color(const Computations& comp, int remaining = 5) const;
+    Tuple refracted_color(const Computations& comp, int remaining = 5) const;
 };
 
 World DefaultWorld();

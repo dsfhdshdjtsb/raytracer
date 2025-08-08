@@ -15,7 +15,14 @@ Tuple World::shade_hit(const Computations& comp, int remaining) const {
 
     Tuple surface = comp.object->material.lighting(this->light, comp.object, comp.over_point, comp.eyev, comp.normalv, shadow);
     Tuple reflect = reflected_color(comp, --remaining);
-    return surface + reflect;
+    Tuple refract = refracted_color(comp, --remaining);
+    Material material = comp.object->material;
+
+    if(material.reflective > 0 && material.transparency > 0) {
+        double reflectance = comp.schlick();
+        return surface + reflect * reflectance + refract * (1 - reflectance);
+    }
+    return surface + reflect + refract;
 }
 
 bool World::is_shadowed(Tuple point) const {
@@ -41,6 +48,26 @@ Tuple World::reflected_color(const Computations& comp, int remaining) const {
     Tuple c = color_at(reflectr, remaining);
 
     return c * comp.object->material.reflective;
+}
+
+Tuple World::refracted_color(const Computations& comp, int remaining) const {
+    //todo with wifi: refractance total internal reflectionn understanding
+    if(comp.object->material.transparency == 0 || remaining <= 0) {
+        return Color(0,0,0);
+    }
+    double ratio = comp.n1 / comp.n2;
+    double cos_i = comp.eyev.dot(comp.normalv);
+    double sin2_t = ratio * ratio * (1 - cos_i * cos_i);
+    if(sin2_t > 1) return Color(0,0,0);
+
+    double cos_t = sqrt(1.0 - sin2_t);
+
+    Tuple direction = comp.normalv * (ratio * cos_i - cos_t) - comp.eyev * ratio;
+
+    Ray refract_ray = Ray(comp.under_point, direction);
+
+    Tuple color = color_at(refract_ray, 5) * comp.object->material.transparency;
+    return color;
 }
 
 Tuple World::color_at(const Ray& r, int remaining) const {

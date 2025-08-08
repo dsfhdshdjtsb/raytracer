@@ -94,12 +94,28 @@ Computations Intersection::prepare_computations(const Ray& r, const Intersection
         normalv = -normalv;
     } 
     Tuple op = point + normalv * (EPSILON); 
-    Computations res(this->t, this->object, point, op, eyev, normalv, reflectv, inside, n1, n2);
+    Tuple up = point - normalv * EPSILON;
+    Computations res(this->t, this->object, point, op, eyev, normalv, reflectv, up, inside, n1, n2);
     return res;
 }
 
-Computations::Computations(double t, std::shared_ptr<Shape> object, Tuple point, Tuple over_point, Tuple eyev, Tuple normalv, Tuple reflectv, bool inside, double n1, double n2) : t(t), object(object), point(point), over_point(over_point), eyev(eyev), normalv(normalv), reflectv(reflectv), inside(inside), n1(n1), n2(n2) {}
+Computations::Computations(double t, std::shared_ptr<Shape> object, Tuple point, Tuple over_point, Tuple eyev, Tuple normalv, Tuple reflectv, Tuple under_point, bool inside, double n1, double n2) : t(t), object(object), point(point), over_point(over_point), eyev(eyev), normalv(normalv), reflectv(reflectv), under_point(under_point), inside(inside), n1(n1), n2(n2) {}
 
+double Computations::schlick() const {
+    double cos_1 = eyev.dot(normalv) ;
+    if( n1 > n2) {
+        double n = n1 / n2;
+        double sin2_t = n * n * (1.0 - cos_1 * cos_1);
+        if ( sin2_t > 1.0) {
+            return 1.0;
+        }
+        double cos_t = sqrt(1.0 -sin2_t);
+        cos_1 = cos_t;
+    }
+    double r0 = ((n1 - n2) / (n1 + n2)) * ((n1 - n2) / (n1 + n2));
+    //TODO: FIX THIS EXPONENT;
+    return r0 + (1 - r0) * (1 - cos_1)* (1 - cos_1)* (1 - cos_1)* (1 - cos_1)* (1 - cos_1);
+}
 bool Intersection::operator==(const Intersection& other) const {
     if(t - other.t >= EPSILON) return false;
     return *object == *other.object;

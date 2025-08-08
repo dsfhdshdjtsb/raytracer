@@ -196,3 +196,78 @@ TEST(Refraction, n1_n2_at_various_intersections) {
         EXPECT_DOUBLE_EQ(comps.n2, ex.n2);
     }
 }
+
+TEST(Refraction, refracted_color_under_total_internal_reflection) {
+    World w = DefaultWorld();
+    std::shared_ptr<Shape> shape = w.objects[0];
+    shape->material.transparency = 1.0;
+    shape->material.refractive_index = 1.5;
+    
+    Ray r = Ray(Point(0, 0, sqrt(2)/2), Vector(0, 1, 0));
+    Intersections xs = {
+        Intersection(-sqrt(2)/2, shape),
+        Intersection(sqrt(2)/2, shape)
+    };
+    
+    auto it = xs.begin();
+    ++it;
+    Intersection second_intersection = *it;
+    
+    Computations comps = second_intersection.prepare_computations(r, xs);
+    Tuple c = w.refracted_color(comps, 5);
+    EXPECT_EQ(Color(0, 0, 0), c);
+}
+
+TEST(Refraction, refracted) {
+    World w = DefaultWorld();
+    
+    std::shared_ptr<Shape> plane = std::make_shared<Plane>();
+
+    plane->transform = Translation(0,-1,0);
+    plane->material.reflective = 0;
+    plane->material.transparency = 0.5;
+    plane->material.refractive_index= 1.5;
+    w.objects.push_back(plane);
+
+    std::shared_ptr<Shape> ball = std::make_shared<Sphere>();
+    ball->material.set_color(Color(1,0,0));
+    ball->material.ambient = 0.5;
+    ball->transform = Translation(0, -3.5, -0.5);
+
+    w.objects.push_back(ball);
+
+    Ray r = Ray(Point(0,0,-3), Vector(0, -1, 1).normalize());
+    Intersections xs = {Intersection(sqrt(2),plane )};
+    Computations comps = xs.hit().prepare_computations(r, xs);
+
+    Tuple color = w.shade_hit(comps, 5);
+ 
+    EXPECT_EQ(Color(0.93642, 0.68642, 0.68642), color);
+}
+
+TEST(Refraction, Schlick) {
+    World w = DefaultWorld();
+    
+    std::shared_ptr<Shape> plane = std::make_shared<Plane>();
+
+    plane->transform = Translation(0,-1,0);
+    plane->material.reflective = 0.5;
+    plane->material.transparency = 0.5;
+    plane->material.refractive_index= 1.5;
+    w.objects.push_back(plane);
+
+    std::shared_ptr<Shape> ball = std::make_shared<Sphere>();
+    ball->material.set_color(Color(1,0,0));
+    ball->material.ambient = 0.5;
+    ball->transform = Translation(0, -3.5, -0.5);
+
+    w.objects.push_back(ball);
+
+    Ray r = Ray(Point(0,0,-3), Vector(0, -1, 1).normalize());
+    Intersections xs = {Intersection(sqrt(2),plane )};
+    Computations comps = xs.hit().prepare_computations(r, xs);
+
+    Tuple color = w.shade_hit(comps, 5);
+
+    EXPECT_EQ(Color(0.93391, 0.69643, 0.69243), color);
+}
