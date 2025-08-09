@@ -42,7 +42,7 @@ Material::Material(const Tuple& c, double a, double d, double sp, double sh, dou
     pattern = std::make_shared<Solid>(c);
 }
 
-Material::Material() : ambient(0.1), diffuse(0.9), specular(0.9), shininess(200), transparency(0), refractive_index(1) {
+Material::Material() : ambient(0.1), diffuse(0.9), specular(0.9), shininess(200), transparency(0), refractive_index(1), reflective(0) {
     pattern = std::make_shared<Solid>(Color(1,1,1));
 }
 
