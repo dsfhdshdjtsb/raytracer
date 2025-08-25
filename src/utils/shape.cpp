@@ -225,6 +225,43 @@ std::shared_ptr<Shape> GlassSphere() {
     glass->material.refractive_index = 1.5;
     return glass;
 } 
+
+std::vector<double> Cube::intersect(const Ray& ray) const {
+    std::vector<double> x,y,z;
+    x = check_axis(ray.origin.x, ray.direction.x);
+    y = check_axis(ray.origin.y, ray.direction.y);
+    z = check_axis(ray.origin.z, ray.direction.z);
+
+    double tmin = std::max(x[0], std::max(y[0], z[0]));
+    double tmax = std::min(x[1], std::min(y[1], y[2]));
+
+    return {}; //todo
+}
+
+Cube::Cube() : origin(Point(0,0,0)){}
+
+std::vector<double> Cube::check_axis(double origin, double direction) const {
+    double tmin_num = (-1 - origin);
+    double tmax_num = (1 - origin);
+
+    double tmin, tmax;
+    if( abs(direction) >= EPSILON) {
+        tmin = tmin_num / direction;
+        tmax = tmax_num / direction;  
+    } else {
+        tmin = tmin_num > 0 ? INFINITY : -INFINITY; 
+        tmax = tmax_num > 0 ? INFINITY : -INFINITY; 
+    }
+
+    if(tmin > tmax) {
+        double temp = tmin;
+        tmin = tmax;
+        tmax = tmin;
+    }
+
+    return {tmin, tmax};
+}
+
 Plane::Plane() {
     transform = IDENTITY_MATRIX;
 }

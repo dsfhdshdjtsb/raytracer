@@ -53,6 +53,17 @@ struct Sphere : public Shape {
 
 std::shared_ptr<Shape> GlassSphere();
 
+struct Cube : public Shape {
+    Tuple origin;
+
+    Cube();
+
+    bool operator==(const Shape& other) const;
+    std::vector<double> check_axis(double origin, double direction) const;
+    std::vector<double> intersect(const Ray& r) const;
+    Tuple normal_at(const Tuple& point) const;
+};
+
 struct Plane : public Shape {
     Plane();
     std::vector<double> intersect(const Ray& r) const;
