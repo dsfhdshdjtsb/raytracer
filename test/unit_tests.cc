@@ -2,6 +2,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <memory>
+#include <algorithm>
 #include "../src/utils/light.h"
 #include "../src/scene/world.h"
 #include "../src/utils/math.h"
@@ -270,4 +271,135 @@ TEST(Refraction, Schlick) {
     Tuple color = w.shade_hit(comps, 5);
 
     EXPECT_EQ(Color(0.93391, 0.69643, 0.69243), color);
+}
+
+TEST(Cube, intersection) {
+    std::shared_ptr<Shape> c = std::make_shared<Cube>();
+    
+    // Test cases where ray misses the cube
+    struct MissExample {
+        Tuple origin;
+        Tuple direction;
+    };
+    
+    std::vector<MissExample> miss_examples = {
+        {Point(-2, 0, 0), Vector(0.2673, 0.5345, 0.8018)},
+        {Point(0, -2, 0), Vector(0.8018, 0.2673, 0.5345)},
+        {Point(0, 0, -2), Vector(0.5345, 0.8018, 0.2673)},
+        {Point(2, 0, 2), Vector(0, 0, -1)},
+        {Point(0, 2, 2), Vector(0, -1, 0)},
+        {Point(2, 2, 0), Vector(-1, 0, 0)}
+    };
+    
+    for (const auto& example : miss_examples) {
+        Ray r(example.origin, example.direction);
+        std::vector<double> xs = c->intersect(r);
+        EXPECT_EQ(0, xs.size()) << "Ray should miss cube from origin " 
+                                << "(" << example.origin.x << "," << example.origin.y << "," << example.origin.z << ")"
+                                << " with direction " 
+                                << "(" << example.direction.x << "," << example.direction.y << "," << example.direction.z << ")";
+    }
+    
+    struct HitExample {
+        Tuple origin;
+        Tuple direction;
+        double t1;
+        double t2;
+    };
+    
+    std::vector<HitExample> hit_examples = {
+        {Point(5, 0.5, 0), Vector(-1, 0, 0), 4, 6},
+        {Point(-5, 0.5, 0), Vector(1, 0, 0), 4, 6},
+        {Point(0.5, 5, 0), Vector(0, -1, 0), 4, 6},
+        {Point(0.5, -5, 0), Vector(0, 1, 0), 4, 6},
+        {Point(0.5, 0, 5), Vector(0, 0, -1), 4, 6},
+        {Point(0.5, 0, -5), Vector(0, 0, 1), 4, 6},
+        {Point(0, 0.5, 0), Vector(0, 0, 1), -1, 1}  
+    };
+    
+    for (const auto& example : hit_examples) {
+        Ray r(example.origin, example.direction);
+        std::vector<double> xs = c->intersect(r);
+        EXPECT_EQ(2, xs.size()) << "Ray should hit cube twice from origin " 
+                               << "(" << example.origin.x << "," << example.origin.y << "," << example.origin.z << ")";
+        EXPECT_DOUBLE_EQ(example.t1, xs[0]) << "First intersection t value incorrect";
+        EXPECT_DOUBLE_EQ(example.t2, xs[1]) << "Second intersection t value incorrect";
+    }
+}
+
+TEST(Cube, normals) {
+    std::shared_ptr<Shape> c = std::make_shared<Cube>();
+    
+    struct NormalExample {
+        Tuple point;
+        Tuple expected_normal;
+    };
+    
+    std::vector<NormalExample> examples = {
+        {Point(1, 0.5, -0.8), Vector(1, 0, 0)},
+        {Point(-1, -0.2, 0.9), Vector(-1, 0, 0)},
+        {Point(-0.4, 1, -0.1), Vector(0, 1, 0)},
+        {Point(0.3, -1, -0.7), Vector(0, -1, 0)},
+        {Point(-0.6, 0.3, 1), Vector(0, 0, 1)},
+        {Point(0.4, 0.4, -1), Vector(0, 0, -1)},
+        {Point(1, 1, 1), Vector(1, 0, 0)},
+        {Point(-1, -1, -1), Vector(-1, 0, 0)}
+    };
+    
+    for (const auto& example : examples) {
+        Tuple normal = c->normal_at(example.point);
+        EXPECT_EQ(example.expected_normal, normal) 
+            << "Normal at point (" << example.point.x << ", " << example.point.y << ", " << example.point.z << ")"
+            << " should be (" << example.expected_normal.x << ", " << example.expected_normal.y << ", " << example.expected_normal.z << ")"
+            << " but got (" << normal.x << ", " << normal.y << ", " << normal.z << ")";
+    }
+}
+
+TEST(Group, intersect_nonempty) {
+    std::shared_ptr<Group> g = std::make_shared<Group>();
+
+    std::shared_ptr<Shape> s1 = std::make_shared<Sphere>();
+    std::shared_ptr<Shape> s2 = std::make_shared<Sphere>();
+    s2->set_transform(Translation(0, 0, -3));
+    std::shared_ptr<Shape> s3 = std::make_shared<Sphere>();
+    s3->set_transform(Translation(5, 0, 0));
+    
+    g->add_child(s1);
+    g->add_child(s2);
+    g->add_child(s3);
+    
+    Ray r(Point(0, 0, -5), Vector(0, 0, 1));
+    Intersections xs = r.intersect(g);
+    
+    EXPECT_EQ(4, xs.size());
+    
+    int count = 0;
+    for(auto i : xs) {
+        if(count == 0 || count == 1) {
+            EXPECT_EQ(s2, i.object);
+        } else {
+            EXPECT_EQ(s1, i.object);
+        } 
+        count++;
+    }
+}
+
+TEST(Group, transforming_groups) {
+    std::shared_ptr<Group> g1 = std::make_shared<Group>();
+    g1->set_transform(Rotation_y(M_PI/2));
+    
+    std::shared_ptr<Group> g2 = std::make_shared<Group>();
+    g2->set_transform(Scaling(1, 2, 3));
+    
+    g1->add_child(g2);
+    
+    std::shared_ptr<Shape> s = std::make_shared<Sphere>();
+    s->set_transform(Translation(5, 0, 0));
+    
+    g2->add_child(s);
+    
+    // Test the normal at the specified point
+    Tuple n = s->normal_at(Point(1.7321, 1.1547, -5.5774));
+    
+    EXPECT_EQ(Vector(0.2857, 0.4286, -0.8571), n);
 }

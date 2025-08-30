@@ -13,6 +13,7 @@
 struct Ray;
 struct Intersection;
 struct Intersections;
+struct Group;
 
 struct Material {
     std::shared_ptr<Pattern> pattern;
@@ -29,17 +30,31 @@ struct Material {
 struct Shape {
     Material material;
     Matrix transform;
+    //Group* parent; //is this bad, idc
+
     Shape();
     virtual ~Shape() {}
 
     virtual bool operator==(const Shape& other) const;
-    void set_transform(const Matrix& t);
+    virtual void set_transform(const Matrix& t);
     virtual std::vector<double> intersect(const Ray& r) const;
     virtual Tuple normal_at(const Tuple& point) const;
     void set_material(const Material& material);
     Tuple color_at(const Tuple& point) const;
 };
 
+struct Group : public Shape {
+
+    std::vector<std::shared_ptr<Shape>> shapes;
+    
+    Group();
+
+    std::vector<double> intersect(const Ray& r) const;
+    Tuple normal_at(const Tuple& point) const;
+    void set_transform(const Matrix& t);
+
+    void add_child(const std::shared_ptr<Shape> shape);
+};
 
 struct Sphere : public Shape {
     double r;
@@ -49,6 +64,7 @@ struct Sphere : public Shape {
     bool operator==(const Shape& other) const;
     std::vector<double> intersect(const Ray& r) const;
     Tuple normal_at(const Tuple& point) const;
+    void set_transform(const Matrix& t);
 };
 
 std::shared_ptr<Shape> GlassSphere();
@@ -62,12 +78,14 @@ struct Cube : public Shape {
     std::vector<double> check_axis(double origin, double direction) const;
     std::vector<double> intersect(const Ray& r) const;
     Tuple normal_at(const Tuple& point) const;
+    void set_transform(const Matrix& t);
 };
 
 struct Plane : public Shape {
     Plane();
     std::vector<double> intersect(const Ray& r) const;
     Tuple normal_at(const Tuple& point) const;
+    void set_transform(const Matrix& t);
 };
 
 struct Computations {

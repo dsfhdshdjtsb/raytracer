@@ -16,6 +16,7 @@ Funny little raytracer to learn more about computer graphics, c++, and cuda.
 - [ ] funny normal stuff
 
 ## TODO eventually
+- [ ] bounding boxes + other opimization
 - [ ] subsurface scattering
 - [ ] PBR
 - [ ] volumetric lighting

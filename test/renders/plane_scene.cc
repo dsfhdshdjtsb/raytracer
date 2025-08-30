@@ -19,7 +19,7 @@ int main() {
     right_wall = std::make_shared<Plane>();
     middle = std::make_shared<Sphere>();
     right = std::make_shared<Sphere>();
-    left = std::make_shared<Sphere>();
+    left = std::make_shared<Cube>();
 
     w.objects = {floor, middle, right, left};
 
@@ -61,7 +61,7 @@ int main() {
 
     w.light = PointLight(Color(1,1,1), Point(-10, 10, -10));
 
-    w.camera = Camera(500, 250, M_PI / 3);
+    w.camera = Camera(1000, 500, M_PI / 3);
     w.camera.transform = ViewTransform(Point(0, 1.5, -5),  Point(0,1,0), Vector(0,1,0)) * Translation(0,0, 3);
 
     Canvas image = w.render();

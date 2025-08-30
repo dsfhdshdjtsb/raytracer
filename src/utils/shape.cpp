@@ -34,6 +34,9 @@ Intersections::Iterator Intersections::end() const {
     return Iterator(pos.end(), pos.end(), neg.end(), neg.end());
 }
 
+
+
+
 Material::Material(std::shared_ptr<Pattern> pattern, double a, double d, double sp, double sh, double rf, double tr, double re_i) : ambient(a), diffuse(d), specular(sp), shininess(sh), reflective(rf), transparency(tr), refractive_index(re_i) {
     this->pattern = pattern;
 }
@@ -46,7 +49,6 @@ Material::Material() : ambient(0.1), diffuse(0.9), specular(0.9), shininess(200)
     pattern = std::make_shared<Solid>(Color(1,1,1));
 }
 
-Shape::Shape() : material(Material()), transform(IDENTITY_MATRIX) {}
 
 Intersection::Intersection(double t, std::shared_ptr<Shape> c): t(t), object(c) {}
 
@@ -162,6 +164,11 @@ bool IntersectionComparator::operator()(const Intersection& a, const Intersectio
     return a.t < b.t;
 }
 
+
+
+
+
+Shape::Shape() : material(Material()), transform(IDENTITY_MATRIX) {}
 bool Shape::operator==(const Shape& other) const { return false;};
 std::vector<double> Shape::intersect(const Ray& r) const {return {};}
 Tuple Shape::normal_at(const Tuple& point) const { return Tuple(0,0,0,0);}
@@ -178,6 +185,9 @@ void Shape::set_transform(const Matrix& t) {
     transform = transform * t;
 }
 
+
+
+
 Sphere::Sphere() : r(1), center(Point(0,0,0)) {
     transform = IDENTITY_MATRIX;
 }
@@ -187,7 +197,6 @@ bool Sphere::operator==(const Shape& other) const {
     if (!s) return false;
     return std::abs(r - s->r) < EPSILON && center == s->center;
 }
-
 
 std::vector<double> Sphere::intersect(const Ray& ray) const {
     Ray transformed = ray.transform(transform.inverse());
@@ -219,6 +228,7 @@ Tuple Sphere::normal_at(const Tuple& point) const {
     normal.w = 0; //avoid weirdness if transform matrix has translation
     return normal.normalize();
 }
+
 std::shared_ptr<Shape> GlassSphere() {
     std::shared_ptr<Shape> glass =  std::make_shared<Sphere>();
     glass->material.transparency = 1.0;
@@ -226,16 +236,49 @@ std::shared_ptr<Shape> GlassSphere() {
     return glass;
 } 
 
+
+
+
+bool Cube::operator==(const Shape& other) const {
+    const Cube* cube = dynamic_cast<const Cube*>(&other);
+    if (!cube) return false;
+    return origin == cube->origin && transform == cube->transform;
+}
+
 std::vector<double> Cube::intersect(const Ray& ray) const {
+    Ray transformed = ray.transform(transform.inverse());
+    Tuple transformed_origin = transformed.origin;
+    Tuple transformed_direction = transformed.direction;
+
     std::vector<double> x,y,z;
-    x = check_axis(ray.origin.x, ray.direction.x);
-    y = check_axis(ray.origin.y, ray.direction.y);
-    z = check_axis(ray.origin.z, ray.direction.z);
+    x = check_axis(transformed_origin.x, transformed_direction.x);
+    y = check_axis(transformed_origin.y, transformed_direction.y);
+    z = check_axis(transformed_origin.z, transformed_direction.z);
 
     double tmin = std::max(x[0], std::max(y[0], z[0]));
-    double tmax = std::min(x[1], std::min(y[1], y[2]));
+    double tmax = std::min(x[1], std::min(y[1], z[1]));
 
-    return {}; //todo
+    if(tmin > tmax) return {};
+    return {tmin, tmax}; 
+}
+
+Tuple Cube::normal_at(const Tuple& point) const {
+    Tuple object_point = transform.inverse() * point;
+    double maxc = std::max(abs(object_point.x), std::max(abs(object_point.y), abs(object_point.z)));
+
+    Tuple object_normal;
+    if(abs(maxc - abs(object_point.x)) < EPSILON) {
+        object_normal = Vector(object_point.x, 0, 0);
+    }
+    else if(abs(maxc - abs(object_point.y)) < EPSILON) {
+        object_normal = Vector(0, object_point.y, 0);
+    }
+    else if(abs(maxc - abs(object_point.z)) < EPSILON) {
+        object_normal = Vector( 0, 0, object_point.z);
+    }
+    object_normal = transform.inverse().T() * object_normal;
+    object_normal.w = 0;
+    return object_normal.normalize();
 }
 
 Cube::Cube() : origin(Point(0,0,0)){}
@@ -256,11 +299,14 @@ std::vector<double> Cube::check_axis(double origin, double direction) const {
     if(tmin > tmax) {
         double temp = tmin;
         tmin = tmax;
-        tmax = tmin;
+        tmax = temp;
     }
 
     return {tmin, tmax};
 }
+
+
+
 
 Plane::Plane() {
     transform = IDENTITY_MATRIX;
@@ -317,4 +363,49 @@ Tuple Material::lighting(PointLight light, std::shared_ptr<Shape> object, Tuple 
 }
 void Material::set_color(Tuple color) {
     pattern = std::make_shared<Solid>(color);
+}
+
+
+
+Group::Group() {};
+
+void Group::add_child(const std::shared_ptr<Shape> shape) {
+    shapes.push_back(shape);
+    shape->set_transform(transform * shape->transform);
+}
+
+std::vector<double> Group::intersect(const Ray& r) const { 
+    Ray transformed = r.transform(transform.inverse());
+    Tuple transformed_origin = transformed.origin;
+    Tuple transformed_direction = transformed.direction;
+
+    std::vector<double> res = {};
+    for(auto shape : shapes) {
+        std::vector<double> temp = shape->intersect(transformed);
+        res.insert(res.end(), temp.begin(), temp.end());
+    }
+    return res;
+}
+
+Tuple Group::normal_at(const Tuple& point) const {
+    return Tuple(0,0,0,1);
+}
+
+void Group::set_transform(const Matrix& t)  {
+    for(auto shape : shapes) {
+        shape->set_transform(t * this->transform.inverse() * shape->transform); 
+    }
+    this->transform = t; 
+}
+
+void Sphere::set_transform(const Matrix& t)  {
+    this->transform = t;
+}
+
+void Cube::set_transform(const Matrix& t)  {
+    this->transform = t;
+}
+
+void Plane::set_transform(const Matrix& t)  {
+    this->transform = t;
 }

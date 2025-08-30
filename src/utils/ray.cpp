@@ -15,10 +15,19 @@ Ray Ray::transform(const Matrix& m) const {
 
 std::vector<Intersection> Ray::intersect(const std::shared_ptr<Shape> shape) const {
 
-    std::vector<double> ts = shape->intersect(*this);
     std::vector<Intersection> res;
-    for(double t : ts) {
-        res.push_back(Intersection(t, shape));
+    if(auto group = std::dynamic_pointer_cast<Group>(shape)) {
+        for(auto s : group->shapes)  {
+            std::vector<double> ts = s->intersect(*this);
+            for(double t : ts) {
+                res.push_back(Intersection(t, s));
+            }
+        }
+    } else {
+        std::vector<double> ts = shape->intersect(*this);
+        for(double t : ts) {
+            res.push_back(Intersection(t, shape));
+        }
     }
     return res;
 }

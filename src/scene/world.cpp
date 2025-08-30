@@ -14,9 +14,9 @@ Tuple World::shade_hit(const Computations& comp, int remaining) const {
     bool shadow = is_shadowed(comp.over_point);
 
     Tuple surface = comp.object->material.lighting(this->light, comp.object, comp.over_point, comp.eyev, comp.normalv, shadow);
+    remaining--;
     Tuple reflect = reflected_color(comp, remaining);
     Tuple refract = refracted_color(comp, remaining);
-    remaining--;
     Material material = comp.object->material;
 
     if(material.reflective > 0 && material.transparency > 0) {
