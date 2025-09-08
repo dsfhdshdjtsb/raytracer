@@ -16,7 +16,7 @@ Ray Ray::transform(const Matrix& m) const {
 std::vector<Intersection> Ray::intersect(const std::shared_ptr<Shape> shape) const {
 
     std::vector<Intersection> res;
-    if(auto group = std::dynamic_pointer_cast<Group>(shape)) {
+    if(auto group = std::dynamic_pointer_cast<Group>(shape)) { //this is terrible
         for(auto s : group->shapes)  {
             std::vector<double> ts = s->intersect(*this);
             for(double t : ts) {

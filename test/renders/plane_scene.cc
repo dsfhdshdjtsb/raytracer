@@ -21,7 +21,54 @@ int main() {
     right = std::make_shared<Sphere>();
     left = std::make_shared<Cube>();
 
-    w.objects = {floor, middle, right, left};
+    // Create a simple pyramid using triangles
+    std::shared_ptr<Group> pyramid = std::make_shared<Group>();
+    
+    // Pyramid base vertices (square base)
+    Tuple base1 = Point(-0.5, 0, -0.5);  // Bottom-left
+    Tuple base2 = Point(0.5, 0, -0.5);   // Bottom-right  
+    Tuple base3 = Point(0.5, 0, 0.5);    // Top-right
+    Tuple base4 = Point(-0.5, 0, 0.5);   // Top-left
+    Tuple apex = Point(0, 1, 0);         // Pyramid peak
+    
+    // Create triangular faces
+    std::shared_ptr<Shape> face1 = std::make_shared<Triangle>(base1, base2, apex);  // Front face
+    std::shared_ptr<Shape> face2 = std::make_shared<Triangle>(base2, base3, apex);  // Right face
+    std::shared_ptr<Shape> face3 = std::make_shared<Triangle>(base3, base4, apex);  // Back face
+    std::shared_ptr<Shape> face4 = std::make_shared<Triangle>(base4, base1, apex);  // Left face
+    
+    // Base triangles (split square base into two triangles)
+    std::shared_ptr<Shape> base_tri1 = std::make_shared<Triangle>(base1, base2, base3);
+    std::shared_ptr<Shape> base_tri2 = std::make_shared<Triangle>(base1, base3, base4);
+    
+    // Set material for pyramid faces
+    Material pyramid_material;
+    pyramid_material.set_color(Color(0.8, 0.2, 0.9));
+    pyramid_material.diffuse = 0.8;
+    pyramid_material.specular = 0.4;
+    pyramid_material.reflective = 0.1;
+    
+    face1->material = pyramid_material;
+    face2->material = pyramid_material;
+    face3->material = pyramid_material;
+    face4->material = pyramid_material;
+    base_tri1->material = pyramid_material;
+    base_tri2->material = pyramid_material;
+    
+    // Add triangles to pyramid group
+    pyramid->add_child(face1);
+    pyramid->add_child(face2);
+    pyramid->add_child(face3);
+    pyramid->add_child(face4);
+    pyramid->add_child(base_tri1);
+    pyramid->add_child(base_tri2);
+    
+    // Position the pyramid in the scene
+    std::cout << face1->transform << std::endl;
+    pyramid->set_transform(Translation(0, 0, -3) * Rotation_y(1.0 /6 * M_PI));
+    std::cout << face1->transform << std::endl;
+
+    w.objects = {floor, middle, right, left, pyramid};
 
     std::shared_ptr<Pattern> pat = std::make_shared<Checkers>(Color(0.9,0.3,0.5), Color(0,0.6,0.8));
     std::shared_ptr<Pattern> pat2 = std::make_shared<Gradient>(Color(0,0.8,0.7), Color(0.6,0.0,0.6));
@@ -61,7 +108,7 @@ int main() {
 
     w.light = PointLight(Color(1,1,1), Point(-10, 10, -10));
 
-    w.camera = Camera(1000, 500, M_PI / 3);
+    w.camera = Camera(400, 200, M_PI / 3);
     w.camera.transform = ViewTransform(Point(0, 1.5, -5),  Point(0,1,0), Vector(0,1,0)) * Translation(0,0, 3);
 
     Canvas image = w.render();

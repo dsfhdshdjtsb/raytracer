@@ -167,10 +167,9 @@ add_executable(
 
 
 include(GoogleTest)
-gtest_discover_tests(math_test)
-gtest_discover_tests(math_test)
-gtest_discover_tests(ray_test)
-gtest_discover_tests(screen_test)
-gtest_discover_tests(shape_test)
-gtest_discover_tests(world_test)
-gtest_discover_tests(unit_tests)
+gtest_discover_tests(math_test DISCOVERY_TIMEOUT 60)
+gtest_discover_tests(ray_test DISCOVERY_TIMEOUT 60)
+gtest_discover_tests(screen_test DISCOVERY_TIMEOUT 60)
+gtest_discover_tests(shape_test DISCOVERY_TIMEOUT 60)
+gtest_discover_tests(world_test DISCOVERY_TIMEOUT 60)
+gtest_discover_tests(unit_tests DISCOVERY_TIMEOUT 60)

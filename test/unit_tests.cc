@@ -403,3 +403,32 @@ TEST(Group, transforming_groups) {
     
     EXPECT_EQ(Vector(0.2857, 0.4286, -0.8571), n);
 }
+
+TEST(Triangle, intersection) {
+    std::shared_ptr<Shape> t = std::make_shared<Triangle>(Point(0, 1, 0), Point(-1, 0, 0), Point(1, 0, 0));
+    
+    Ray r(Point(0, 0.5, -2), Vector(0, 0, 1));
+    std::vector<double> xs = t->intersect(r);
+    
+    EXPECT_EQ(1, xs.size());
+    EXPECT_DOUBLE_EQ(2, xs[0]);
+}
+
+TEST(Triangle, intersections) {
+    std::shared_ptr<Shape> t = std::make_shared<Triangle>(Point(0, 1, 0), Point(-1, 0, 0), Point(1, 0, 0));
+    
+    // Test ray misses p1-p2 edge
+    Ray r1(Point(-1, 1, -2), Vector(0, 0, 1));
+    std::vector<double> xs1 = t->intersect(r1);
+    EXPECT_EQ(0, xs1.size()) << "Ray should miss p1-p2 edge";
+    
+    // Test ray misses p1-p3 edge  
+    Ray r2(Point(1, 1, -2), Vector(0, 0, 1));
+    std::vector<double> xs2 = t->intersect(r2);
+    EXPECT_EQ(0, xs2.size()) << "Ray should miss p1-p3 edge";
+    
+    // Test ray misses p2-p3 edge
+    Ray r3(Point(0, -1, -2), Vector(0, 0, 1));
+    std::vector<double> xs3 = t->intersect(r3);
+    EXPECT_EQ(0, xs3.size()) << "Ray should miss p2-p3 edge";
+}

@@ -2,7 +2,7 @@
 
 Funny little raytracer to learn more about computer graphics, c++, and cuda.
 
-![3 spheres render](./saved/3spheres.png)
+![3 spheres render](./saved/triangleprism.png)
 ## TODO
 
 - [ ] other primitives (cubes, cylinders, cones)

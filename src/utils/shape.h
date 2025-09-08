@@ -88,6 +88,22 @@ struct Plane : public Shape {
     void set_transform(const Matrix& t);
 };
 
+struct Triangle : public Shape {
+    Tuple e1;
+    Tuple e2; 
+
+    Tuple p1;
+    Tuple p2;
+    Tuple p3;
+
+    Triangle();
+    Triangle(Tuple p1, Tuple p2, Tuple p3);
+
+    std::vector<double> intersect(const Ray& r) const;
+    Tuple normal_at(const Tuple& point) const;
+    void set_transform(const Matrix& t);
+};
+
 struct Computations {
     double t;
     std::shared_ptr<Shape> object;

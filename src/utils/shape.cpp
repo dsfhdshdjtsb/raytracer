@@ -367,6 +367,47 @@ void Material::set_color(Tuple color) {
 
 
 
+Triangle::Triangle() {
+
+}
+Triangle::Triangle(Tuple p1, Tuple p2, Tuple p3) {
+    this->p1 = p1;
+    this->p2 = p2;
+    this->p3 = p3;
+
+    e1 = p2 - p1;
+    e2 = p3 - p1;
+}
+
+std::vector<double> Triangle::intersect(const Ray& r) const {
+    Ray transformed = r.transform(transform.inverse());
+    Tuple transformed_origin = transformed.origin;
+    Tuple transformed_direction = transformed.direction;
+
+    Tuple dir_cross_e2 = transformed_direction.cross(e2);
+    float det = e1.dot(dir_cross_e2);
+    if (abs(det) < EPSILON) return {};
+
+    float f = 1.0 / det;
+    Tuple p_to_origin = transformed_origin - p1;
+    float u = f * p_to_origin.dot(dir_cross_e2);
+    if( u < 0 || u > 1) return {};
+
+    Tuple origin_cross_e1 = p_to_origin.cross(e1);
+    float v = f * transformed_direction.dot(origin_cross_e1);
+    if( v < 0 || (u + v) > 1) return {};
+
+    float t = f * e2.dot(origin_cross_e1);
+    return {t};
+}
+
+Tuple Triangle::normal_at(const Tuple& point) const {
+    return e1.cross(e2).normalize();
+}
+void Triangle::set_transform(const Matrix& t) {
+    this->transform = t;
+}
+
 Group::Group() {};
 
 void Group::add_child(const std::shared_ptr<Shape> shape) {
