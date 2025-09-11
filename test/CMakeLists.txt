@@ -165,6 +165,35 @@ add_executable(
   ../src/utils/pattern.cpp
 )
 
+add_executable(
+  parser_test
+  parser_test.cc
+  ../src/utils/math.cpp
+  ../src/utils/ray.cpp
+  ../src/utils/shape.cpp
+  ../src/utils/light.cpp
+  ../src/utils/pattern.cpp
+  ../src/file/parser.cpp
+)
+target_link_libraries(
+  parser_test
+  GTest::gtest_main
+)
+
+add_executable(
+  obj_scene 
+  ./renders/obj_scene.cc
+  ../src/utils/math.cpp
+  ../src/utils/ray.cpp
+  ../src/utils/shape.cpp
+  ../src/utils/light.cpp
+  ../src/scene/world.cpp
+  ../src/scene/camera.cpp
+  ../src/screen/canvas.cpp
+  ../src/utils/pattern.cpp
+  ../src/file/parser.cpp
+)
+
 
 include(GoogleTest)
 gtest_discover_tests(math_test DISCOVERY_TIMEOUT 60)
@@ -173,3 +202,4 @@ gtest_discover_tests(screen_test DISCOVERY_TIMEOUT 60)
 gtest_discover_tests(shape_test DISCOVERY_TIMEOUT 60)
 gtest_discover_tests(world_test DISCOVERY_TIMEOUT 60)
 gtest_discover_tests(unit_tests DISCOVERY_TIMEOUT 60)
+gtest_discover_tests(parser_test DISCOVERY_TIMEOUT 60)
