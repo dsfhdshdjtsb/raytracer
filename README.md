@@ -5,9 +5,9 @@ Funny little raytracer to learn more about computer graphics, c++, and cuda.
 ![3 spheres render](./saved/triangleprism.png)
 ## TODO
 
-- [ ] other primitives (cubes, cylinders, cones)
-- [ ] triangles
-- [ ] OBJ file support
+- [x] other primitives (cubes, cylinders, cones)
+- [x] triangles
+- [x] OBJ file support
 - [ ] soft shadows
 - [ ] area lights, spotlights
 - [ ] CUDA support
