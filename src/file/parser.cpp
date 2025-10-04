@@ -33,12 +33,10 @@ std::shared_ptr<Group> Parser::parse_string(const std::string& obj_content) cons
     while (std::getline(stream, line)) {
         line_number++;
         
-        // Skip empty lines and comments
         if (line.empty() || line[0] == '#') {
             continue;
         }
         
-        // Remove trailing whitespace
         line.erase(line.find_last_not_of(" \t\r\n") + 1);
         
         // Parse vertex lines (v x y z)
@@ -59,9 +57,11 @@ std::shared_ptr<Group> Parser::parse_string(const std::string& obj_content) cons
         }
         // Parse face lines (f v1 v2 v3)
         else if (line.substr(0, 2) == "f ") {
-            std::shared_ptr<Triangle> triangle = parse_face_line(line, file_vertices);
-            if (triangle != nullptr) {
-                group->add_child(triangle);
+            std::vector<std::shared_ptr<Triangle>> triangles = parse_face_line(line, file_vertices);
+            if (triangles.size() > 0) {
+                for (const auto& triangle : triangles) {
+                    group->add_child(triangle);
+                }
             } else {
                 std::cerr << "Warning: Invalid face at line " << line_number << ": " << line << std::endl;
             }
@@ -93,22 +93,19 @@ std::vector<std::string> Parser::split(const std::string& str, char delimiter) c
     return tokens;
 }
 
-std::shared_ptr<Triangle> Parser::parse_face_line(const std::string& line, const std::vector<Tuple>& vertices) const {
+std::vector<std::shared_ptr<Triangle>> Parser::parse_face_line(const std::string& line, const std::vector<Tuple>& vertices) const {
     std::vector<std::string> parts = split(line, ' ');
     
-    // Need at least "f v1 v2 v3" (4 parts)
     if (parts.size() < 4) {
-        return nullptr;
+        return {};
     }
     
     try {
-        // Parse vertex indices (OBJ files use 1-based indexing)
         std::vector<int> vertex_indices;
         
         for (size_t i = 1; i < parts.size(); ++i) {
             std::string vertex_ref = parts[i];
             
-            // Handle vertex/texture/normal format (v/vt/vn) - we only want the vertex index
             size_t slash_pos = vertex_ref.find('/');
             if (slash_pos != std::string::npos) {
                 vertex_ref = vertex_ref.substr(0, slash_pos);
@@ -116,47 +113,48 @@ std::shared_ptr<Triangle> Parser::parse_face_line(const std::string& line, const
             
             int vertex_index = std::stoi(vertex_ref);
             
-            // Convert from 1-based to 0-based indexing
             vertex_index--;
             
-            // Validate index
             if (vertex_index < 0 || vertex_index >= static_cast<int>(vertices.size())) {
                 std::cerr << "Warning: Vertex index " << (vertex_index + 1) << " out of range" << std::endl;
-                return nullptr;
+                return {};
             }
             
             vertex_indices.push_back(vertex_index);
         }
         
-        // For now, we only handle triangular faces
-        // If there are more than 3 vertices, we'll triangulate by creating multiple triangles
         if (vertex_indices.size() == 3) {
-            // Simple triangle
-            return std::make_shared<Triangle>(
+            return {std::make_shared<Triangle>(
                 vertices[vertex_indices[0]],
                 vertices[vertex_indices[1]], 
                 vertices[vertex_indices[2]]
-            );
+            )};
         } else if (vertex_indices.size() > 3) {
-            // For polygons with more than 3 vertices, create triangle fan
-            // This assumes convex polygons - for complex polygons, more sophisticated triangulation would be needed
-            std::cerr << "Warning: Polygon with " << vertex_indices.size() << " vertices found. Using simple fan triangulation." << std::endl;
+            if (vertex_indices.size() == 4) {
+                return {std::make_shared<Triangle>( //note sure if this is guaranteed to work
+                    vertices[vertex_indices[0]],
+                    vertices[vertex_indices[1]], 
+                    vertices[vertex_indices[2]]
+                ), std::make_shared<Triangle>(
+                    vertices[vertex_indices[0]],
+                    vertices[vertex_indices[2]], 
+                    vertices[vertex_indices[3]]
+                )};
+            }
+            std::cerr << "Warning: Polygon with " << vertex_indices.size() << " vertices found. Using 1 triangle" << std::endl;
             
-            // Create the first triangle (v0, v1, v2)
-            return std::make_shared<Triangle>(
+            return {std::make_shared<Triangle>(
                 vertices[vertex_indices[0]],
                 vertices[vertex_indices[1]], 
                 vertices[vertex_indices[2]]
-            );
+            )};
             
-            // Note: In a complete implementation, you'd want to create multiple triangles
-            // for polygons with >3 vertices, but for simplicity we're just taking the first triangle
         }
         
     } catch (const std::exception& e) {
         std::cerr << "Warning: Error parsing face line: " << line << " - " << e.what() << std::endl;
-        return nullptr;
+        return {};
     }
     
-    return nullptr;
+    return {};
 }

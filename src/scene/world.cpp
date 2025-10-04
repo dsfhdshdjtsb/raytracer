@@ -89,7 +89,9 @@ Canvas World::render() const {
             Ray r = camera.ray_for_pixel(i, j);
             Tuple color = this->color_at(r, 5); //5 IS THE TOTAL NUMBER OF REFLECTIONS ALLOWED !!!
             canvas[j][i] = color;
+            std::cout << "Percent done: " << (double)(i * camera.vsize + j) / (camera.hsize * camera.vsize) * 100 << "%\r" << std::flush;
         }
+        
     }
     return canvas;
 }

@@ -30,24 +30,29 @@ int main() {
         "f 1 4 2\n"
         "f 2 4 3\n";           
     
-    std::shared_ptr<Group> obj_model = parser.parse_string(simple_obj);
-    
-    obj_model->set_transform(Translation(0, 1, 0) * Scaling(0.5, 0.5, 0.5) * Rotation_y(1 / 3.0 * M_PI));
-     
+    std::shared_ptr<Group> teapot = parser.parse("../renders/assets/teapot-low.obj");
+
+    teapot->set_transform( Rotation_x(-M_PI/2) * Translation(0,1,0) * Scaling(0.1,0.1,0.1) );
+
     Material model_material;
-    model_material.set_color(Color(0.8, 0.2, 0.9));
-    model_material.diffuse = 0.7;
+    model_material.set_color(Color(0.6, 0.6, 0.65));
+    model_material.diffuse = 0.12;
+    model_material.ambient = 0.1;
     model_material.specular = 0.3;
+    model_material.reflective = 0.7;
+    model_material.shininess = 100;
+
     
-    for (auto& shape : obj_model->shapes) {
+    for (auto& shape : teapot->shapes) { //bad but fast
         shape->set_material(model_material);
     }
+    std::cout << "done setting mat" << std::endl;
     
-    w.objects = {floor, obj_model};
+    w.objects = {floor, teapot};
     
     w.light = PointLight(Color(1, 1, 1), Point(-10, 10, -10));
     
-    w.camera = Camera(400, 200, M_PI / 3);
+    w.camera = Camera(40, 20, M_PI / 3);
     w.camera.transform = ViewTransform(Point(0, 1.5, -5), Point(0, 1, 0), Vector(0, 1, 0));
     
     Canvas image = w.render();

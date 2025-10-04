@@ -74,7 +74,18 @@
         "xstring": "cpp",
         "xtr1common": "cpp",
         "xtree": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "cwctype": "cpp",
+        "memory_resource": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "string_view": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp",
+        "span": "cpp",
+        "text_encoding": "cpp",
+        "cstdarg": "cpp",
+        "cinttypes": "cpp"
     },
     "cmake.sourceDirectory": "C:/Users/Nick/git/raytracer/test"
 }

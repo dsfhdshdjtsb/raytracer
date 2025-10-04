@@ -58,7 +58,7 @@ int main() {
     pyramid->add_child(base_tri2);
     
     std::cout << face1->transform << std::endl;
-    pyramid->set_transform(Translation(0, 0, -3) * Rotation_y(1.0 /6 * M_PI));
+    pyramid->set_transform(Translation(0, 1, -3) * Rotation_y(1.0 /6 * M_PI));
     std::cout << face1->transform << std::endl;
 
     w.objects = {floor, middle, right, left, pyramid};
@@ -99,7 +99,7 @@ int main() {
 
     w.light = PointLight(Color(1,1,1), Point(-10, 10, -10));
 
-    w.camera = Camera(400, 200, M_PI / 3);
+    w.camera = Camera(200, 100, M_PI / 3);
     w.camera.transform = ViewTransform(Point(0, 1.5, -5),  Point(0,1,0), Vector(0,1,0)) * Translation(0,0, 3);
 
     Canvas image = w.render();

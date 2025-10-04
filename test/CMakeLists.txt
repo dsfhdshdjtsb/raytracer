@@ -181,6 +181,19 @@ target_link_libraries(
 )
 
 add_executable(
+  cornell_box_scene
+  ./renders/cornell_box_scene.cc
+  ../src/utils/math.cpp
+  ../src/utils/ray.cpp
+  ../src/utils/shape.cpp
+  ../src/utils/light.cpp
+  ../src/scene/world.cpp
+  ../src/scene/camera.cpp
+  ../src/screen/canvas.cpp
+  ../src/utils/pattern.cpp
+  ../src/file/parser.cpp
+)
+add_executable(
   obj_scene 
   ./renders/obj_scene.cc
   ../src/utils/math.cpp

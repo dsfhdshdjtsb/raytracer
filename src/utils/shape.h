@@ -14,6 +14,7 @@ struct Ray;
 struct Intersection;
 struct Intersections;
 struct Group;
+struct Bounds;
 
 struct Material {
     std::shared_ptr<Pattern> pattern;
@@ -27,6 +28,7 @@ struct Material {
     void set_color(Tuple color);
 };
 
+
 struct Shape {
     Material material;
     Matrix transform;
@@ -39,8 +41,19 @@ struct Shape {
     virtual void set_transform(const Matrix& t);
     virtual std::vector<double> intersect(const Ray& r) const;
     virtual Tuple normal_at(const Tuple& point) const;
+    virtual Bounds bounds() const;
     void set_material(const Material& material);
     Tuple color_at(const Tuple& point) const;
+    
+};
+
+struct Bounds {
+    Tuple bl;
+    Tuple tr;
+    
+    Bounds();
+    std::vector<double> check_axis(double origin, double direction, double min, double max) const;
+    std::vector<double> intersect(const Ray& r) const;
 };
 
 struct Group : public Shape {
@@ -52,9 +65,11 @@ struct Group : public Shape {
     std::vector<double> intersect(const Ray& r) const;
     Tuple normal_at(const Tuple& point) const;
     void set_transform(const Matrix& t);
-
+    Bounds bounds() const;
+    
     void add_child(const std::shared_ptr<Shape> shape);
 };
+
 
 struct Sphere : public Shape {
     double r;
@@ -65,6 +80,7 @@ struct Sphere : public Shape {
     std::vector<double> intersect(const Ray& r) const;
     Tuple normal_at(const Tuple& point) const;
     void set_transform(const Matrix& t);
+    Bounds bounds() const;
 };
 
 std::shared_ptr<Shape> GlassSphere();
@@ -72,13 +88,18 @@ std::shared_ptr<Shape> GlassSphere();
 struct Cube : public Shape {
     Tuple origin;
 
+    Tuple tr;
+    Tuple bl;
+
     Cube();
+    Cube(Tuple bl, Tuple tr);
 
     bool operator==(const Shape& other) const;
-    std::vector<double> check_axis(double origin, double direction) const;
+    std::vector<double> check_axis(double origin, double direction, double min, double max) const;
     std::vector<double> intersect(const Ray& r) const;
     Tuple normal_at(const Tuple& point) const;
     void set_transform(const Matrix& t);
+    Bounds bounds() const;
 };
 
 struct Plane : public Shape {
@@ -86,6 +107,7 @@ struct Plane : public Shape {
     std::vector<double> intersect(const Ray& r) const;
     Tuple normal_at(const Tuple& point) const;
     void set_transform(const Matrix& t);
+    Bounds bounds() const;
 };
 
 struct Triangle : public Shape {
@@ -102,6 +124,7 @@ struct Triangle : public Shape {
     std::vector<double> intersect(const Ray& r) const;
     Tuple normal_at(const Tuple& point) const;
     void set_transform(const Matrix& t);
+    Bounds bounds() const;
 };
 
 struct Computations {

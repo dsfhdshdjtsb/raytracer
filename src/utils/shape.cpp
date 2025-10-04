@@ -5,6 +5,7 @@
 #include <math.h>
 #include <list>
 #include <algorithm>
+#include <float.h>
 
 Intersections::Iterator::Iterator(SetIter pos_it, SetIter pos_end, SetIter neg_it, SetIter neg_end)
     : pos_it(pos_it), pos_end(pos_end), neg_it(neg_it), neg_end(neg_end) {}
@@ -172,6 +173,7 @@ Shape::Shape() : material(Material()), transform(IDENTITY_MATRIX) {}
 bool Shape::operator==(const Shape& other) const { return false;};
 std::vector<double> Shape::intersect(const Ray& r) const {return {};}
 Tuple Shape::normal_at(const Tuple& point) const { return Tuple(0,0,0,0);}
+Bounds Shape::bounds() const { return bounds();}
 
 void Shape::set_material(const Material& mat) {
     material = mat;
@@ -197,6 +199,7 @@ bool Sphere::operator==(const Shape& other) const {
     if (!s) return false;
     return std::abs(r - s->r) < EPSILON && center == s->center;
 }
+
 
 std::vector<double> Sphere::intersect(const Ray& ray) const {
     Ray transformed = ray.transform(transform.inverse());
@@ -238,7 +241,6 @@ std::shared_ptr<Shape> GlassSphere() {
 
 
 
-
 bool Cube::operator==(const Shape& other) const {
     const Cube* cube = dynamic_cast<const Cube*>(&other);
     if (!cube) return false;
@@ -251,15 +253,37 @@ std::vector<double> Cube::intersect(const Ray& ray) const {
     Tuple transformed_direction = transformed.direction;
 
     std::vector<double> x,y,z;
-    x = check_axis(transformed_origin.x, transformed_direction.x);
-    y = check_axis(transformed_origin.y, transformed_direction.y);
-    z = check_axis(transformed_origin.z, transformed_direction.z);
+    x = check_axis(transformed_origin.x, transformed_direction.x, bl.x, tr.x);
+    y = check_axis(transformed_origin.y, transformed_direction.y, bl.y, tr.y);
+    z = check_axis(transformed_origin.z, transformed_direction.z, bl.z, tr.z);
 
     double tmin = std::max(x[0], std::max(y[0], z[0]));
     double tmax = std::min(x[1], std::min(y[1], z[1]));
 
     if(tmin > tmax) return {};
     return {tmin, tmax}; 
+}
+
+std::vector<double> Cube::check_axis(double origin, double direction, double min, double max) const {
+    double tmin_num = (min - origin);
+    double tmax_num = (max - origin);
+
+    double tmin, tmax;
+    if( abs(direction) >= EPSILON) {
+        tmin = tmin_num / direction;
+        tmax = tmax_num / direction;  
+    } else {
+        tmin = tmin_num > 0 ? INFINITY : -INFINITY; 
+        tmax = tmax_num > 0 ? INFINITY : -INFINITY; 
+    }
+
+    if(tmin > tmax) {
+        double temp = tmin;
+        tmin = tmax;
+        tmax = temp;
+    }
+
+    return {tmin, tmax};
 }
 
 Tuple Cube::normal_at(const Tuple& point) const {
@@ -281,29 +305,8 @@ Tuple Cube::normal_at(const Tuple& point) const {
     return object_normal.normalize();
 }
 
-Cube::Cube() : origin(Point(0,0,0)){}
-
-std::vector<double> Cube::check_axis(double origin, double direction) const {
-    double tmin_num = (-1 - origin);
-    double tmax_num = (1 - origin);
-
-    double tmin, tmax;
-    if( abs(direction) >= EPSILON) {
-        tmin = tmin_num / direction;
-        tmax = tmax_num / direction;  
-    } else {
-        tmin = tmin_num > 0 ? INFINITY : -INFINITY; 
-        tmax = tmax_num > 0 ? INFINITY : -INFINITY; 
-    }
-
-    if(tmin > tmax) {
-        double temp = tmin;
-        tmin = tmax;
-        tmax = temp;
-    }
-
-    return {tmin, tmax};
-}
+Cube::Cube() : origin(Point(0,0,0)), tr(Point(1,1,1)), bl(Point(-1,-1,-1)) {}
+Cube::Cube(Tuple bl, Tuple tr): origin(Point(0,0,0)), bl(bl), tr(tr) {}
 
 
 
@@ -402,17 +405,18 @@ std::vector<double> Triangle::intersect(const Ray& r) const {
 }
 
 Tuple Triangle::normal_at(const Tuple& point) const {
-    return e1.cross(e2).normalize();
-}
-void Triangle::set_transform(const Matrix& t) {
-    this->transform = t;
+    // Triangle normals are constant across the surface, so we don't need the point
+    // But we still need to transform the normal from object space to world space
+    Tuple object_normal = e1.cross(e2).normalize();
+    Tuple world_normal = transform.inverse().T() * object_normal;
+    world_normal.w = 0; // avoid weirdness if transform matrix has translation
+    return world_normal.normalize();
 }
 
 Group::Group() {};
 
 void Group::add_child(const std::shared_ptr<Shape> shape) {
     shapes.push_back(shape);
-    shape->set_transform(transform * shape->transform);
 }
 
 std::vector<double> Group::intersect(const Ray& r) const { 
@@ -433,11 +437,10 @@ Tuple Group::normal_at(const Tuple& point) const {
 }
 
 void Group::set_transform(const Matrix& t)  {
-    for(auto shape : shapes) {
-        shape->set_transform(t * this->transform.inverse() * shape->transform); 
-    }
     this->transform = t; 
 }
+
+
 
 void Sphere::set_transform(const Matrix& t)  {
     this->transform = t;
@@ -449,4 +452,87 @@ void Cube::set_transform(const Matrix& t)  {
 
 void Plane::set_transform(const Matrix& t)  {
     this->transform = t;
+}
+
+void Triangle::set_transform(const Matrix& t) {
+    this->transform = t;
+}
+
+Bounds::Bounds() {
+    tr = {};
+    bl = {};
+}
+
+ 
+Bounds Group::bounds() const {
+    double xmin, ymin, zmin;
+    double xmax, ymax, zmax;
+
+    xmin = DBL_MAX;
+    ymin = DBL_MAX;
+    zmin = DBL_MAX;
+
+    xmax = -DBL_MAX;
+    ymax = -DBL_MAX;
+    zmax = -DBL_MAX;
+
+    for(auto& shape : shapes) {
+        Bounds b = shape->bounds();
+
+        for(auto& x : {b.bl.x, b.tr.x}) {
+            for( auto& y: {b.bl.y, b.tr.y}) {
+                for(auto& z : {b.bl.z, b.tr.z}) {
+                    Tuple point = shape->transform * Point(x,y,z);
+                    xmin = std::min(xmin, point.x);
+                    xmax = std::max(xmax, point.x);
+
+                    ymin = std::min(ymin, point.y);
+                    ymax = std::max(ymax, point.y);
+
+                    zmin = std::min(zmin, point.z);
+                    zmax = std::max(zmax, point.z);
+                }
+            }
+        }
+    }
+    Bounds res;
+    res.bl = Point(xmin, ymin, zmin);
+    res.tr = Point(xmax, ymax, zmax);
+    return res;
+}
+
+Bounds Sphere::bounds() const {
+    Bounds b; 
+    b.bl = {-1,-1,-1, 1};
+    b.tr = {1,1,1,1};
+    return b;
+}
+
+Bounds Cube::bounds() const {
+    Bounds b;
+    b.bl = {-1,-1,-1, 1};
+    b.tr = {1,1,1, 1};
+    return b;
+}
+
+Bounds Plane::bounds() const {
+    Bounds b;
+    b.bl = {-DBL_MAX, -DBL_MAX, -EPSILON, 1};
+    b.tr = {DBL_MAX, DBL_MAX, EPSILON, 1};
+    return b;
+}
+
+Bounds Triangle::bounds() const {
+    Bounds b;
+    float xmin = std::min(p1.x, std::min(p2.x, p3.x));
+    float ymin = std::min(p1.y, std::min(p2.y, p3.y));
+    float zmin = std::min(p1.z, std::min(p2.z, p3.z));
+
+    float xmax = std::max(p1.x, std::max(p2.x, p3.x));
+    float ymax = std::max(p1.y, std::max(p2.y, p3.y));
+    float zmax = std::max(p1.z, std::max(p2.z, p3.z));
+
+    b.bl = Point(xmin, ymin, zmin);
+    b.tr = Point(xmax, ymax, zmax);
+    return b;
 }

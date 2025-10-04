@@ -16,7 +16,7 @@ struct Parser {
     
 private:
     std::vector<std::string> split(const std::string& str, char delimiter) const;
-    std::shared_ptr<Triangle> parse_face_line(const std::string& line, const std::vector<Tuple>& vertices) const;
+    std::vector<std::shared_ptr<Triangle>> parse_face_line(const std::string& line, const std::vector<Tuple>& vertices) const;
 };
 
 #endif
