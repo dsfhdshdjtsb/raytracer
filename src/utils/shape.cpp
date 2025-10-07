@@ -405,11 +405,65 @@ std::vector<double> Triangle::intersect(const Ray& r) const {
 }
 
 Tuple Triangle::normal_at(const Tuple& point) const {
-    // Triangle normals are constant across the surface, so we don't need the point
-    // But we still need to transform the normal from object space to world space
     Tuple object_normal = e1.cross(e2).normalize();
     Tuple world_normal = transform.inverse().T() * object_normal;
-    world_normal.w = 0; // avoid weirdness if transform matrix has translation
+    world_normal.w = 0; 
+    return world_normal.normalize();
+}
+
+SmoothTriangle::SmoothTriangle() {}
+
+SmoothTriangle::SmoothTriangle(Tuple p1, Tuple p2, Tuple p3, Tuple n1, Tuple n2, Tuple n3): p1(p1), p2(p2), p3(p3), n1(n1), n2(n2), n3(n3) {
+    e1 = p2 - p1;
+    e2 = p3 - p1;
+}
+
+std::vector<double> SmoothTriangle::intersect(const Ray& r) const {
+    Ray transformed = r.transform(transform.inverse());
+    Tuple transformed_origin = transformed.origin;
+    Tuple transformed_direction = transformed.direction;
+
+    Tuple dir_cross_e2 = transformed_direction.cross(e2);
+    double det = e1.dot(dir_cross_e2);
+    if (abs(det) < EPSILON) return {};
+
+    double f = 1.0 / det;
+    Tuple p_to_origin = transformed_origin - p1;
+    double u = f * p_to_origin.dot(dir_cross_e2);
+    if( u < 0 || u > 1) return {};
+
+    Tuple origin_cross_e1 = p_to_origin.cross(e1);
+    double v = f * transformed_direction.dot(origin_cross_e1);
+    if( v < 0 || (u + v) > 1) return {};
+
+    double t = f * e2.dot(origin_cross_e1);
+    return {t};
+}
+
+
+
+Tuple SmoothTriangle::normal_at(const Tuple& point) const {
+    //std::cout<<"here"<<std::endl;
+    Tuple object_point = transform.inverse() * point;
+    
+    Tuple v0 = p3 - p1;
+    Tuple v1 = p2 - p1; 
+    Tuple v2 = object_point - p1;
+    
+    double dot00 = v0.dot(v0);
+    double dot01 = v0.dot(v1);
+    double dot02 = v0.dot(v2);
+    double dot11 = v1.dot(v1);
+    double dot12 = v1.dot(v2);
+    
+    double invDenom = 1.0 / (dot00 * dot11 - dot01 * dot01);
+    double u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    double v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+    
+    Tuple object_normal = n1 * (1 - u - v) + n2 * v + n3 * u;
+    
+    Tuple world_normal = transform.inverse().T() * object_normal;
+    world_normal.w = 0;
     return world_normal.normalize();
 }
 
@@ -455,6 +509,10 @@ void Plane::set_transform(const Matrix& t)  {
 }
 
 void Triangle::set_transform(const Matrix& t) {
+    this->transform = t;
+}
+
+void SmoothTriangle::set_transform(const Matrix& t) {
     this->transform = t;
 }
 
@@ -523,6 +581,21 @@ Bounds Plane::bounds() const {
 }
 
 Bounds Triangle::bounds() const {
+    Bounds b;
+    float xmin = std::min(p1.x, std::min(p2.x, p3.x));
+    float ymin = std::min(p1.y, std::min(p2.y, p3.y));
+    float zmin = std::min(p1.z, std::min(p2.z, p3.z));
+
+    float xmax = std::max(p1.x, std::max(p2.x, p3.x));
+    float ymax = std::max(p1.y, std::max(p2.y, p3.y));
+    float zmax = std::max(p1.z, std::max(p2.z, p3.z));
+
+    b.bl = Point(xmin, ymin, zmin);
+    b.tr = Point(xmax, ymax, zmax);
+    return b;
+}
+
+Bounds SmoothTriangle::bounds() const {
     Bounds b;
     float xmin = std::min(p1.x, std::min(p2.x, p3.x));
     float ymin = std::min(p1.y, std::min(p2.y, p3.y));

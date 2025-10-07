@@ -8,7 +8,7 @@
 
 struct Parser {
     std::vector<Tuple> vertices;
-    
+    std::vector<Tuple> normals; 
     Parser();
     
     std::shared_ptr<Group> parse(const std::string& path) const;
@@ -16,7 +16,7 @@ struct Parser {
     
 private:
     std::vector<std::string> split(const std::string& str, char delimiter) const;
-    std::vector<std::shared_ptr<Triangle>> parse_face_line(const std::string& line, const std::vector<Tuple>& vertices) const;
+    std::vector<std::shared_ptr<Shape>> parse_face_line(const std::string& line, const std::vector<Tuple>& vertices, const std::vector<Tuple>& normals) const;
 };
 
 #endif

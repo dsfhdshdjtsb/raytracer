@@ -2,6 +2,11 @@
 
 Funny little raytracer to learn more about computer graphics, c++, and cuda.
 
+![alt text](./saved/teapotartifacting.png)
+
+*Funny little teapot except it has some funny little artifacts :(*
+
+
 ![3 spheres render](./saved/triangleprism.png)
 ## TODO
 

@@ -72,3 +72,105 @@ TEST(Parser, ignore_unsupported_commands) {
     
     EXPECT_EQ(1, group->shapes.size());
 }
+
+// Test: Faces with normals
+TEST(Parser, FacesWithNormals) {
+    std::string obj_content = R"(
+v 0 1 0
+v -1 0 0
+v 1 0 0
+
+vn -1 0 0
+vn 1 0 0
+vn 0 1 0
+
+f 1//3 2//1 3//2
+f 1/0/3 2/102/1 3/14/2
+)";
+
+    Parser parser;
+    std::shared_ptr<Group> g = parser.parse_string(obj_content);
+    
+    ASSERT_EQ(g->shapes.size(), 2);
+    
+    //print type of first triangle
+    std::shared_ptr<SmoothTriangle> t1 = std::dynamic_pointer_cast<SmoothTriangle>(g->shapes[0]);
+    ASSERT_NE(t1, nullptr) << "First shape should be a SmoothTriangle";
+    
+    // Check vertices
+    EXPECT_EQ(t1->p1, Point(0, 1, 0));  // parser.vertices[1] (1-indexed)
+    EXPECT_EQ(t1->p2, Point(-1, 0, 0)); // parser.vertices[2] 
+    EXPECT_EQ(t1->p3, Point(1, 0, 0));  // parser.vertices[3]
+    
+    // Check normals
+    EXPECT_EQ(t1->n1, Vector(0, 1, 0));  // parser.normals[3] (1-indexed)
+    EXPECT_EQ(t1->n2, Vector(-1, 0, 0)); // parser.normals[1]
+    EXPECT_EQ(t1->n3, Vector(1, 0, 0));  // parser.normals[2]
+    
+    // Second triangle - should also be SmoothTriangle  
+    std::shared_ptr<SmoothTriangle> t2 = std::dynamic_pointer_cast<SmoothTriangle>(g->shapes[1]);
+    ASSERT_NE(t2, nullptr) << "Second shape should be a SmoothTriangle";
+    
+    // Second triangle should have same properties as first (t2 = t1)
+    EXPECT_EQ(t2->p1, t1->p1);
+    EXPECT_EQ(t2->p2, t1->p2);
+    EXPECT_EQ(t2->p3, t1->p3);
+    EXPECT_EQ(t2->n1, t1->n1);
+    EXPECT_EQ(t2->n2, t1->n2);
+    EXPECT_EQ(t2->n3, t1->n3);
+}
+
+// Test: Faces without normals should create regular triangles
+TEST(Parser, FacesWithoutNormals) {
+    std::string obj_content = R"(
+v 0 1 0
+v -1 0 0
+v 1 0 0
+
+f 1 2 3
+)";
+
+    Parser parser;
+    std::shared_ptr<Group> g = parser.parse_string(obj_content);
+    
+    ASSERT_EQ(g->shapes.size(), 1);
+    
+    // Should be regular Triangle, not SmoothTriangle
+    std::shared_ptr<Triangle> t = std::dynamic_pointer_cast<Triangle>(g->shapes[0]);
+    ASSERT_NE(t, nullptr) << "Shape should be a regular Triangle";
+    
+    // Should NOT be a SmoothTriangle
+    std::shared_ptr<SmoothTriangle> st = std::dynamic_pointer_cast<SmoothTriangle>(g->shapes[0]);
+    EXPECT_EQ(st, nullptr) << "Shape should NOT be a SmoothTriangle";
+}
+
+// Test: Mixed format - some faces with normals, some without
+TEST(Parser, MixedFaceFormats) {
+    std::string obj_content = R"(
+v 0 1 0
+v -1 0 0
+v 1 0 0
+v 0 0 1
+
+vn 0 1 0
+vn -1 0 0
+
+f 1 2 3
+f 1//1 2//2 4//1
+)";
+
+    Parser parser;
+    std::shared_ptr<Group> g = parser.parse_string(obj_content);
+    
+    ASSERT_EQ(g->shapes.size(), 2);
+    
+    // First triangle - regular Triangle (no normals)
+    std::shared_ptr<Triangle> t1 = std::dynamic_pointer_cast<Triangle>(g->shapes[0]);
+    ASSERT_NE(t1, nullptr) << "First shape should be a regular Triangle";
+    std::shared_ptr<SmoothTriangle> st1 = std::dynamic_pointer_cast<SmoothTriangle>(g->shapes[0]);
+    EXPECT_EQ(st1, nullptr) << "First shape should NOT be a SmoothTriangle";
+    
+    // Second triangle - SmoothTriangle (with normals)
+    std::shared_ptr<SmoothTriangle> t2 = std::dynamic_pointer_cast<SmoothTriangle>(g->shapes[1]);
+    ASSERT_NE(t2, nullptr) << "Second shape should be a SmoothTriangle";
+}

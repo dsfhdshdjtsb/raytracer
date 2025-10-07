@@ -52,7 +52,7 @@ int main() {
     
     w.light = PointLight(Color(1, 1, 1), Point(-10, 10, -10));
     
-    w.camera = Camera(40, 20, M_PI / 3);
+    w.camera = Camera(100, 50, M_PI / 3);
     w.camera.transform = ViewTransform(Point(0, 1.5, -5), Point(0, 1, 0), Vector(0, 1, 0));
     
     Canvas image = w.render();

@@ -434,3 +434,12 @@ TEST(Triangle, intersections) {
     std::vector<double> xs3 = t->intersect(r3);
     EXPECT_EQ(0, xs3.size()) << "Ray should miss p2-p3 edge";
 }
+
+TEST(SmoothTriangle, normal_at) {
+    std::shared_ptr<Shape> tri = std::make_shared<SmoothTriangle>(Point(0, 1, 0), Point(-1, 0, 0), Point(1, 0, 0), Vector(0, 1, 0), Vector(-1, 0, 0), Vector(1, 0, 0));
+    Intersection i(1.0, tri);
+
+    Computations comps = i.prepare_computations(Ray(Point(-0.2, 0.3, -2), Vector(0, 0, 1)));
+    Tuple n = tri->normal_at(comps.point);
+    EXPECT_EQ(Vector(-0.5547, 0.83205, 0), n);
+}

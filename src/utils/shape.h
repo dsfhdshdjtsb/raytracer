@@ -125,6 +125,30 @@ struct Triangle : public Shape {
     Tuple normal_at(const Tuple& point) const;
     void set_transform(const Matrix& t);
     Bounds bounds() const;
+
+};
+
+struct SmoothTriangle : public Shape {
+    Tuple e1;
+    Tuple e2; 
+
+    //double u, v;
+
+    Tuple p1;
+    Tuple p2;
+    Tuple p3;
+
+    Tuple n1;
+    Tuple n2;
+    Tuple n3;
+
+    SmoothTriangle();
+    SmoothTriangle(Tuple p1, Tuple p2, Tuple p3, Tuple n1, Tuple n2, Tuple n3);
+
+    std::vector<double> intersect(const Ray& r) const;
+    Tuple normal_at(const Tuple& point) const;
+    void set_transform(const Matrix& t);
+    Bounds bounds() const;
 };
 
 struct Computations {
